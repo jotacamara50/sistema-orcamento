@@ -25,6 +25,7 @@ function initializeDatabase() {
       brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}',
       whatsapp_template TEXT DEFAULT 'Olá {{cliente}}, segue o orçamento {{numero}} no valor de {{total}}. Qualquer dúvida fico à disposição.',
       is_paid INTEGER DEFAULT 0,
+      paid_until TEXT,
       trial_budget_count INTEGER DEFAULT 0,
       trial_blocked_at TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
@@ -34,6 +35,10 @@ function initializeDatabase() {
   const userColumns = db.prepare('PRAGMA table_info(users)').all().map((column) => column.name);
   if (!userColumns.includes('brand_color')) {
     db.exec(`ALTER TABLE users ADD COLUMN brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}'`);
+  }
+
+  if (!userColumns.includes('paid_until')) {
+    db.exec('ALTER TABLE users ADD COLUMN paid_until TEXT');
   }
 
   // Clients table
@@ -59,6 +64,7 @@ function initializeDatabase() {
       data TEXT DEFAULT CURRENT_TIMESTAMP,
       status TEXT DEFAULT 'rascunho',
       total REAL DEFAULT 0,
+      logo_data TEXT,
       observacoes TEXT,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
@@ -66,6 +72,11 @@ function initializeDatabase() {
       CHECK(status IN ('rascunho', 'enviado', 'aprovado', 'recusado'))
     )
   `);
+
+  const budgetColumns = db.prepare('PRAGMA table_info(budgets)').all().map((column) => column.name);
+  if (!budgetColumns.includes('logo_data')) {
+    db.exec('ALTER TABLE budgets ADD COLUMN logo_data TEXT');
+  }
 
   // Budget items table
   db.exec(`

@@ -6,6 +6,27 @@ const router = express.Router();
 
 router.use(authenticateToken);
 
+function isPaidActive(user) {
+    if (!user || !user.is_paid) {
+        return false;
+    }
+    if (!user.paid_until) {
+        return true;
+    }
+    const paidUntilValue = String(user.paid_until);
+    const paidUntilMs = Date.parse(paidUntilValue);
+    if (Number.isNaN(paidUntilMs)) {
+        return false;
+    }
+    const nowMs = Date.now();
+    if (paidUntilValue.length === 10) {
+        const endOfDay = new Date(paidUntilMs);
+        endOfDay.setHours(23, 59, 59, 999);
+        return endOfDay.getTime() >= nowMs;
+    }
+    return paidUntilMs >= nowMs;
+}
+
 // List budgets
 router.get('/', (req, res) => {
     try {
@@ -52,16 +73,17 @@ router.get('/:id', (req, res) => {
 // Create budget with trial validation
 router.post('/', (req, res) => {
     try {
-        const { client_id, items, observacoes } = req.body;
+        const { client_id, items, observacoes, logo_data } = req.body;
 
         if (!client_id || !items || items.length === 0) {
             return res.status(400).json({ error: 'Cliente e itens são obrigatórios' });
         }
 
         // Check trial limit
-        const user = db.prepare('SELECT is_paid, trial_budget_count FROM users WHERE id = ?').get(req.user.id);
+        const user = db.prepare('SELECT is_paid, paid_until, trial_budget_count FROM users WHERE id = ?').get(req.user.id);
+        const paidActive = isPaidActive(user);
 
-        if (!user.is_paid && user.trial_budget_count >= 3) {
+        if (!paidActive && user.trial_budget_count >= 3) {
             return res.status(403).json({
                 error: 'Limite de orçamentos gratuitos atingido',
                 trial_expired: true
@@ -84,10 +106,11 @@ router.post('/', (req, res) => {
         const total = items.reduce((sum, item) => sum + (item.quantidade * item.valor_unitario), 0);
 
         // Insert budget
+        const normalizedLogo = typeof logo_data === 'string' && logo_data.trim() ? logo_data.trim() : null;
         const budgetResult = db.prepare(`
-      INSERT INTO budgets (user_id, client_id, numero, total, observacoes)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(req.user.id, client_id, numero, total, observacoes || null);
+      INSERT INTO budgets (user_id, client_id, numero, total, logo_data, observacoes)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(req.user.id, client_id, numero, total, normalizedLogo, observacoes || null);
 
         const budgetId = budgetResult.lastInsertRowid;
 
@@ -102,7 +125,7 @@ router.post('/', (req, res) => {
         }
 
         // Increment trial count if not paid
-        if (!user.is_paid) {
+        if (!paidActive) {
             db.prepare('UPDATE users SET trial_budget_count = trial_budget_count + 1 WHERE id = ?').run(req.user.id);
         }
 
@@ -126,11 +149,11 @@ router.post('/', (req, res) => {
 // Update budget
 router.put('/:id', (req, res) => {
     try {
-        const { client_id, items, observacoes, status } = req.body;
+        const { client_id, items, observacoes, status, logo_data } = req.body;
         const budgetId = req.params.id;
 
         // Verify ownership
-        const budget = db.prepare('SELECT user_id FROM budgets WHERE id = ?').get(budgetId);
+        const budget = db.prepare('SELECT user_id, logo_data FROM budgets WHERE id = ?').get(budgetId);
         if (!budget || budget.user_id !== req.user.id) {
             return res.status(404).json({ error: 'Orçamento não encontrado' });
         }
@@ -139,11 +162,15 @@ router.put('/:id', (req, res) => {
         const total = items.reduce((sum, item) => sum + (item.quantidade * item.valor_unitario), 0);
 
         // Update budget
+        const updatedLogo = logo_data === undefined
+            ? budget.logo_data
+            : (typeof logo_data === 'string' && logo_data.trim() ? logo_data.trim() : null);
+
         db.prepare(`
       UPDATE budgets
-      SET client_id = ?, total = ?, observacoes = ?, status = ?
+      SET client_id = ?, total = ?, observacoes = ?, status = ?, logo_data = ?
       WHERE id = ?
-    `).run(client_id, total, observacoes || null, status || 'rascunho', budgetId);
+    `).run(client_id, total, observacoes || null, status || 'rascunho', updatedLogo, budgetId);
 
         // Delete old items
         db.prepare('DELETE FROM budget_items WHERE budget_id = ?').run(budgetId);
@@ -181,7 +208,7 @@ router.delete('/:id', (req, res) => {
         const budgetId = req.params.id;
 
         // Verify ownership
-        const budget = db.prepare('SELECT user_id FROM budgets WHERE id = ?').get(budgetId);
+        const budget = db.prepare('SELECT user_id, logo_data FROM budgets WHERE id = ?').get(budgetId);
         if (!budget || budget.user_id !== req.user.id) {
             return res.status(404).json({ error: 'Orçamento não encontrado' });
         }

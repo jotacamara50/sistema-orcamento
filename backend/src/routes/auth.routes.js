@@ -5,6 +5,28 @@ import { generateToken, authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
 
+function isPaidActive(user) {
+    if (!user || !user.is_paid) {
+        return false;
+    }
+    if (!user.paid_until) {
+        return true;
+    }
+    const paidUntilValue = String(user.paid_until);
+    const paidUntilMs = Date.parse(paidUntilValue);
+    if (Number.isNaN(paidUntilMs)) {
+        return false;
+    }
+    const nowMs = Date.now();
+    if (paidUntilValue.length === 10) {
+        const endOfDay = new Date(paidUntilMs);
+        endOfDay.setHours(23, 59, 59, 999);
+        return endOfDay.getTime() >= nowMs;
+    }
+    return paidUntilMs >= nowMs;
+}
+
+
 // Register
 router.post('/register', async (req, res) => {
     try {
@@ -32,14 +54,18 @@ router.post('/register', async (req, res) => {
 
         const token = generateToken({ id: result.lastInsertRowid, email });
         const createdUser = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
       FROM users WHERE id = ?
     `).get(result.lastInsertRowid);
+        const is_paid_active = isPaidActive(createdUser);
 
         res.status(201).json({
             message: 'Usuário criado com sucesso',
             token,
-            user: createdUser
+            user: {
+                ...createdUser,
+                is_paid_active
+            }
         });
     } catch (error) {
         console.error('Register error:', error);
@@ -69,6 +95,7 @@ router.post('/login', async (req, res) => {
         }
 
         const token = generateToken({ id: user.id, email: user.email });
+        const is_paid_active = isPaidActive(user);
 
         res.json({
             token,
@@ -79,7 +106,9 @@ router.post('/login', async (req, res) => {
                 telefone: user.telefone,
                 tipo_servico: user.tipo_servico,
                 brand_color: user.brand_color,
+                paid_until: user.paid_until,
                 is_paid: user.is_paid,
+                is_paid_active,
                 trial_budget_count: user.trial_budget_count
             }
         });
@@ -93,7 +122,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, (req, res) => {
     try {
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
       FROM users WHERE id = ?
     `).get(req.user.id);
 
@@ -101,7 +130,10 @@ router.get('/me', authenticateToken, (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        res.json(user);
+        res.json({
+            ...user,
+            is_paid_active: isPaidActive(user)
+        });
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ error: 'Erro ao buscar usuário' });
@@ -118,7 +150,7 @@ router.put('/me', authenticateToken, (req, res) => {
         }
 
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
       FROM users WHERE id = ?
     `).get(req.user.id);
 
@@ -166,12 +198,17 @@ router.put('/me', authenticateToken, (req, res) => {
       WHERE id = ?
     `).run(updatedNome, updatedTelefone, updatedTipoServico, updatedBrandColor, req.user.id);
 
-        res.json({
+        const updatedUser = {
             ...user,
             nome: updatedNome,
             telefone: updatedTelefone,
             tipo_servico: updatedTipoServico,
             brand_color: updatedBrandColor
+        };
+
+        res.json({
+            ...updatedUser,
+            is_paid_active: isPaidActive(updatedUser)
         });
     } catch (error) {
         console.error('Update user error:', error);

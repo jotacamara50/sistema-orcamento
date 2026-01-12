@@ -10,12 +10,29 @@ export default function BudgetFormPage() {
     const navigate = useNavigate();
     const { user, updateUser } = useAuth();
     const isEdit = !!id;
+    const isPaidActive = (() => {
+        if (!user || !user.is_paid) {
+            return false;
+        }
+        if (!user.paid_until) {
+            return true;
+        }
+        const paidUntilValue = String(user.paid_until);
+        const paidUntilMs = Date.parse(paidUntilValue);
+        if (Number.isNaN(paidUntilMs)) {
+            return false;
+        }
+        const endOfDay = new Date(paidUntilMs);
+        endOfDay.setHours(23, 59, 59, 999);
+        return endOfDay.getTime() >= Date.now();
+    })();
 
     const [clients, setClients] = useState([]);
     const [formData, setFormData] = useState({
         client_id: '',
         observacoes: '',
         status: 'rascunho',
+        logo_data: '',
         items: [{ descricao: '', quantidade: 1, valor_unitario: 0 }]
     });
     const [loading, setLoading] = useState(false);
@@ -45,6 +62,7 @@ export default function BudgetFormPage() {
                 client_id: res.data.client_id,
                 observacoes: res.data.observacoes || '',
                 status: res.data.status,
+                logo_data: res.data.logo_data || '',
                 items: res.data.items
             });
         } catch (error) {
@@ -61,6 +79,26 @@ export default function BudgetFormPage() {
         const newItems = [...formData.items];
         newItems[index][field] = field === 'descricao' ? value : parseFloat(value) || 0;
         setFormData({ ...formData, items: newItems });
+    };
+
+    const handleLogoChange = (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) {
+            return;
+        }
+        if (file.size > 1024 * 1024) {
+            setError('Logo muito grande. Use ate 1MB.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = () => {
+            setFormData({ ...formData, logo_data: reader.result });
+        };
+        reader.readAsDataURL(file);
+    };
+
+    const handleRemoveLogo = () => {
+        setFormData({ ...formData, logo_data: '' });
     };
 
     const addItem = () => {
@@ -92,7 +130,7 @@ export default function BudgetFormPage() {
             } else {
                 const res = await budgetsApi.create(formData);
                 // Update trial count after successful creation
-                if (!user.is_paid) {
+                if (!isPaidActive) {
                     updateUser({ trial_budget_count: user.trial_budget_count + 1 });
                 }
             }
@@ -149,6 +187,31 @@ export default function BudgetFormPage() {
                                     Nenhum cliente cadastrado.{' '}
                                     <a href="/clients" style={{ color: 'var(--primary)' }}>Criar cliente</a>
                                 </p>
+                            )}
+                        </div>
+
+                        <div className="form-group" style={{ marginTop: 'var(--space-lg)' }}>
+                            <label>Logo do orcamento (opcional)</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="input"
+                                onChange={handleLogoChange}
+                            />
+                            <div className="text-secondary text-xs" style={{ marginTop: 'var(--space-xs)' }}>
+                                PNG ou JPG ate 1MB.
+                            </div>
+                            {formData.logo_data && (
+                                <div style={{ marginTop: 'var(--space-sm)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
+                                    <img
+                                        src={formData.logo_data}
+                                        alt="Logo do orcamento"
+                                        style={{ maxHeight: '60px', maxWidth: '180px', objectFit: 'contain', border: '1px solid var(--border)', padding: '4px', borderRadius: '6px' }}
+                                    />
+                                    <button type="button" className="btn btn-secondary btn-sm" onClick={handleRemoveLogo}>
+                                        Remover
+                                    </button>
+                                </div>
                             )}
                         </div>
                     </div>

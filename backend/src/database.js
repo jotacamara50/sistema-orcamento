@@ -6,6 +6,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const db = new Database(join(__dirname, '..', 'orcamentos.db'));
+const DEFAULT_BRAND_COLOR = '#2563eb';
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -21,6 +22,7 @@ function initializeDatabase() {
       nome TEXT NOT NULL,
       telefone TEXT,
       tipo_servico TEXT,
+      brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}',
       whatsapp_template TEXT DEFAULT 'Olá {{cliente}}, segue o orçamento {{numero}} no valor de {{total}}. Qualquer dúvida fico à disposição.',
       is_paid INTEGER DEFAULT 0,
       trial_budget_count INTEGER DEFAULT 0,
@@ -28,6 +30,11 @@ function initializeDatabase() {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  const userColumns = db.prepare('PRAGMA table_info(users)').all().map((column) => column.name);
+  if (!userColumns.includes('brand_color')) {
+    db.exec(`ALTER TABLE users ADD COLUMN brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}'`);
+  }
 
   // Clients table
   db.exec(`

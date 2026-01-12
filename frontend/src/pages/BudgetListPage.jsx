@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { budgets } from '../api';
@@ -46,11 +46,86 @@ export default function BudgetListPage() {
         return new Date(dateStr).toLocaleDateString('pt-BR');
     };
 
+    const stats = useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+
+        let approvedTotal = 0;
+        let pendingTotal = 0;
+        let approvedCount = 0;
+        let refusedCount = 0;
+
+        for (const budget of budgetList) {
+            const total = Number(budget.total) || 0;
+            const status = budget.status;
+            const budgetDate = new Date(budget.data);
+            const isCurrentMonth = budgetDate.getMonth() === currentMonth && budgetDate.getFullYear() === currentYear;
+
+            if (status === 'aprovado') {
+                approvedCount += 1;
+                if (isCurrentMonth) {
+                    approvedTotal += total;
+                }
+            }
+
+            if (status === 'rascunho' || status === 'enviado') {
+                pendingTotal += total;
+            }
+
+            if (status === 'recusado') {
+                refusedCount += 1;
+            }
+        }
+
+        const decidedCount = approvedCount + refusedCount;
+        const conversionRate = decidedCount > 0 ? approvedCount / decidedCount : 0;
+
+        return {
+            approvedTotal,
+            pendingTotal,
+            conversionRate
+        };
+    }, [budgetList]);
+
     return (
         <div>
             <Navbar />
 
             <div className="container page">
+                <div style={{
+                    display: 'grid',
+                    gap: 'var(--space-md)',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    marginBottom: 'var(--space-lg)'
+                }}>
+                    <div className="card" style={{ borderLeft: '6px solid #16a34a' }}>
+                        <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
+                            Aprovados este mes
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a' }}>
+                            {formatCurrency(stats.approvedTotal)}
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ borderLeft: '6px solid #f59e0b' }}>
+                        <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
+                            Pendentes
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#b45309' }}>
+                            {formatCurrency(stats.pendingTotal)}
+                        </div>
+                    </div>
+
+                    <div className="card" style={{ borderLeft: '6px solid #0ea5e9' }}>
+                        <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
+                            Taxa de conversao
+                        </div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0ea5e9' }}>
+                            {Math.round(stats.conversionRate * 100)}%
+                        </div>
+                    </div>
+                </div>
                 <div className="flex justify-between items-center mb-xl">
                     <div>
                         <h1>Orçamentos</h1>

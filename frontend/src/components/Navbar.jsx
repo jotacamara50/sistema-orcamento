@@ -40,6 +40,9 @@ export default function Navbar() {
                     <Link to="/clients" style={{ textDecoration: 'none', color: 'var(--text-primary)', fontWeight: 500 }}>
                         Clientes
                     </Link>
+                    <Link to="/profile" style={{ textDecoration: 'none', color: 'var(--text-primary)', fontWeight: 500 }}>
+                        Meu Perfil
+                    </Link>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                         <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                             {user?.nome}

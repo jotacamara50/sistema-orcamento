@@ -25,7 +25,7 @@ router.get('/budgets/:id/pdf', async (req, res) => {
         const items = db.prepare('SELECT * FROM budget_items WHERE budget_id = ?').all(req.params.id);
         budget.items = items;
 
-        const user = db.prepare('SELECT nome, email, telefone, tipo_servico FROM users WHERE id = ?').get(req.user.id);
+        const user = db.prepare('SELECT nome, email, telefone, tipo_servico, brand_color FROM users WHERE id = ?').get(req.user.id);
 
         const pdfBuffer = await generateBudgetPDF(budget, user);
 

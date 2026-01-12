@@ -31,11 +31,15 @@ router.post('/register', async (req, res) => {
     `).run(email, password_hash, nome, telefone || null, tipo_servico || null);
 
         const token = generateToken({ id: result.lastInsertRowid, email });
+        const createdUser = db.prepare(`
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
+      FROM users WHERE id = ?
+    `).get(result.lastInsertRowid);
 
         res.status(201).json({
             message: 'Usuário criado com sucesso',
             token,
-            user: { id: result.lastInsertRowid, email, nome }
+            user: createdUser
         });
     } catch (error) {
         console.error('Register error:', error);
@@ -72,6 +76,9 @@ router.post('/login', async (req, res) => {
                 id: user.id,
                 email: user.email,
                 nome: user.nome,
+                telefone: user.telefone,
+                tipo_servico: user.tipo_servico,
+                brand_color: user.brand_color,
                 is_paid: user.is_paid,
                 trial_budget_count: user.trial_budget_count
             }
@@ -86,7 +93,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, (req, res) => {
     try {
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
       FROM users WHERE id = ?
     `).get(req.user.id);
 
@@ -98,6 +105,77 @@ router.get('/me', authenticateToken, (req, res) => {
     } catch (error) {
         console.error('Get user error:', error);
         res.status(500).json({ error: 'Erro ao buscar usuário' });
+    }
+});
+
+// Update current user profile
+router.put('/me', authenticateToken, (req, res) => {
+    try {
+        const { nome, telefone, tipo_servico, brand_color } = req.body;
+
+        if (nome === undefined && telefone === undefined && tipo_servico === undefined && brand_color === undefined) {
+            return res.status(400).json({ error: 'Nenhum dado para atualizar' });
+        }
+
+        const user = db.prepare(`
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, is_paid, trial_budget_count
+      FROM users WHERE id = ?
+    `).get(req.user.id);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario nao encontrado' });
+        }
+
+        const normalizeOptional = (value) => {
+            if (value === undefined) {
+                return undefined;
+            }
+            if (value === null) {
+                return null;
+            }
+            const trimmed = String(value).trim();
+            return trimmed ? trimmed : null;
+        };
+
+        const updatedNome = nome !== undefined ? String(nome ?? '').trim() : user.nome;
+        if (nome !== undefined && !updatedNome) {
+            return res.status(400).json({ error: 'Nome e obrigatorio' });
+        }
+
+        const normalizedTelefone = normalizeOptional(telefone);
+        const normalizedTipoServico = normalizeOptional(tipo_servico);
+        const normalizedBrandColor = normalizeOptional(brand_color);
+
+        const updatedTelefone = normalizedTelefone === undefined ? user.telefone : normalizedTelefone;
+        const updatedTipoServico = normalizedTipoServico === undefined ? user.tipo_servico : normalizedTipoServico;
+
+        let updatedBrandColor = user.brand_color;
+        if (normalizedBrandColor !== undefined) {
+            if (normalizedBrandColor === null) {
+                updatedBrandColor = null;
+            } else if (!/^#[0-9a-fA-F]{6}$/.test(normalizedBrandColor)) {
+                return res.status(400).json({ error: 'Cor invalida. Use #RRGGBB' });
+            } else {
+                updatedBrandColor = normalizedBrandColor.toLowerCase();
+            }
+        }
+
+        db.prepare(`
+      UPDATE users
+      SET nome = ?, telefone = ?, tipo_servico = ?, brand_color = ?
+      WHERE id = ?
+    `).run(updatedNome, updatedTelefone, updatedTipoServico, updatedBrandColor, req.user.id);
+
+        res.json({
+            ...user,
+            nome: updatedNome,
+            telefone: updatedTelefone,
+            tipo_servico: updatedTipoServico,
+            brand_color: updatedBrandColor
+        });
+    } catch (error) {
+        console.error('Update user error:', error);
+        res.status(500).json({ error: 'Erro ao atualizar usuario' });
     }
 });
 

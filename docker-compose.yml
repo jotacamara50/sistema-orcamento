@@ -58,6 +58,7 @@ services:
       LETSENCRYPT_HOST: orcazap.net,www.orcazap.net
       LETSENCRYPT_EMAIL: contato@orcazap.net
       VIRTUAL_PORT: "80"
+      HTTPS_METHOD: "noredirect"
     depends_on:
       - backend
     networks:

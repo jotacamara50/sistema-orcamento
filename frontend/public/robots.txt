@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+Disallow: /login
+Disallow: /register
+Disallow: /budgets
+Disallow: /budgets/
+Disallow: /clients
+Disallow: /profile
+
+Sitemap: https://orcazap.net/sitemap.xml

@@ -325,6 +325,217 @@ h4 { font-size: 1rem; font-weight: 600; }
   color: var(--text-primary);
 }
 
+/* Site institucional */
+.site-page {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f8fbff 0%, #f9fafb 45%, #ffffff 100%);
+  color: var(--text-primary);
+}
+
+.site-header {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom: 1px solid var(--border);
+  overflow: visible;
+}
+
+.site-header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 72px;
+  padding: 0;
+}
+
+.site-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.site-logo-image {
+  width: 160px;
+  height: 160px;
+  object-fit: contain;
+}
+
+.app-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.app-logo img {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+}
+
+.site-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.site-main {
+  padding-bottom: var(--space-xl);
+}
+
+.site-hero {
+  position: relative;
+  padding: calc(var(--space-xl) * 2) 0 var(--space-xl);
+  overflow: hidden;
+}
+
+.site-hero::before {
+  content: '';
+  position: absolute;
+  top: -120px;
+  right: -140px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(circle, rgba(37, 99, 235, 0.2), transparent 60%);
+  pointer-events: none;
+}
+
+.site-hero-inner {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.site-hero-subtitle {
+  margin-top: var(--space-md);
+  font-size: 1rem;
+}
+
+.site-hero-actions {
+  display: flex;
+  gap: var(--space-md);
+  flex-wrap: wrap;
+  margin-top: var(--space-lg);
+}
+
+.site-hero-trust {
+  margin-top: var(--space-sm);
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.site-section {
+  padding: var(--space-xl) 0;
+}
+
+.site-section + .site-section {
+  border-top: 1px solid var(--border);
+}
+
+.site-section-inner {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.site-section-text {
+  margin-top: var(--space-md);
+  color: var(--text-secondary);
+}
+
+.site-list {
+  list-style: none;
+  margin-top: var(--space-md);
+  padding: 0;
+  display: grid;
+  gap: var(--space-sm);
+}
+
+.site-list li {
+  position: relative;
+  padding-left: 1.25rem;
+  color: var(--text-primary);
+}
+
+.site-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.55rem;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--primary-light);
+}
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  background: white;
+  padding: var(--space-lg) 0;
+  margin-top: var(--space-xl);
+}
+
+.site-footer-inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-lg);
+}
+
+.site-footer-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+}
+
+.site-footer-logo {
+  display: inline-flex;
+  align-items: center;
+}
+
+.site-footer-logo-image {
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
+}
+
+.auth-logo {
+  width: 180px;
+  height: 180px;
+  object-fit: contain;
+  display: block;
+  margin: 0 auto var(--space-sm);
+}
+
+.site-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-lg);
+  font-size: 0.875rem;
+}
+
+.site-footer-links a {
+  color: var(--text-secondary);
+  text-decoration: none;
+}
+
+.site-footer-links a:hover {
+  color: var(--text-primary);
+}
+
+.site-legal {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.site-legal h1 {
+  margin-bottom: var(--space-md);
+}
+
+.site-legal h2 {
+  margin-top: var(--space-lg);
+}
+
+.site-legal p {
+  margin-top: var(--space-sm);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   h1 { font-size: 1.75rem; }
@@ -344,5 +555,36 @@ h4 { font-size: 1rem; font-weight: 600; }
   
   .modal {
     padding: var(--space-lg);
+  }
+
+  .site-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    height: auto;
+    padding: var(--space-md) 0;
+    gap: var(--space-md);
+  }
+
+  .site-logo-image {
+    width: 120px;
+    height: 120px;
+  }
+
+  .app-logo img {
+    width: 96px;
+    height: 96px;
+  }
+
+  .auth-logo {
+    width: 140px;
+    height: 140px;
+  }
+
+  .site-hero {
+    padding: var(--space-xl) 0;
+  }
+
+  .site-footer-inner {
+    align-items: flex-start;
   }
 }

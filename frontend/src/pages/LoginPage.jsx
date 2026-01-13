@@ -1,9 +1,9 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-export default function LoginPage() {
-    const [isRegister, setIsRegister] = useState(false);
+export default function LoginPage({ defaultRegister = false }) {
+    const [isRegister, setIsRegister] = useState(defaultRegister);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -16,6 +16,11 @@ export default function LoginPage() {
 
     const { login, register } = useAuth();
     const navigate = useNavigate();
+
+    useEffect(() => {
+        setIsRegister(defaultRegister);
+        setError('');
+    }, [defaultRegister]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -51,6 +56,7 @@ export default function LoginPage() {
         }}>
             <div className="card" style={{ maxWidth: '450px', width: '100%', margin: 'var(--space-lg)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
+                    <img src="/logo1.png" alt="OrçaZap" className="auth-logo" />
                     <h1 style={{ marginBottom: 'var(--space-sm)' }}>
                         {isRegister ? 'Criar Conta' : 'Entrar'}
                     </h1>
@@ -147,7 +153,7 @@ export default function LoginPage() {
                 <div style={{ textAlign: 'center', marginTop: 'var(--space-lg)' }}>
                     <button
                         onClick={() => {
-                            setIsRegister(!isRegister);
+                            navigate(isRegister ? '/login' : '/register');
                             setError('');
                         }}
                         style={{

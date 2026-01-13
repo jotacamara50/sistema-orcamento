@@ -81,7 +81,7 @@ export default function BudgetListPage() {
                 setShowTrialModal(true);
             } else {
                 console.error('Error duplicating budget:', error);
-                alert(error.response?.data?.error || 'Erro ao duplicar orcamento');
+                alert(error.response?.data?.error || 'Erro ao duplicar orçamento');
             }
         } finally {
             setDuplicatingId(null);
@@ -166,7 +166,7 @@ export default function BudgetListPage() {
             window.open(res.data.whatsapp_link, '_blank');
         } catch (error) {
             console.error('Error generating activation link:', error);
-            alert(error.response?.data?.error || 'Erro ao gerar link de renovacao');
+            alert(error.response?.data?.error || 'Erro ao gerar link de renovação');
         } finally {
             setRenewLoading(false);
         }
@@ -185,7 +185,7 @@ export default function BudgetListPage() {
                 }}>
                     <div className="card" style={{ borderLeft: '6px solid #16a34a' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
-                            Aprovados este mes
+                            Aprovados este mês
                         </div>
                         <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a' }}>
                             {formatCurrency(stats.approvedTotal)}
@@ -203,7 +203,7 @@ export default function BudgetListPage() {
 
                     <div className="card" style={{ borderLeft: '6px solid #0ea5e9' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
-                            Taxa de conversao
+                            Taxa de conversão
                         </div>
                         <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0ea5e9' }}>
                             {Math.round(stats.conversionRate * 100)}%
@@ -227,7 +227,7 @@ export default function BudgetListPage() {
                             </div>
                             <div className="text-secondary text-sm" style={{ marginTop: 'var(--space-xs)' }}>
                                 {isExpired
-                                    ? `Seu plano venceu ha ${Math.abs(renewal.daysRemaining)} dias.`
+                                    ? `Seu plano venceu há ${Math.abs(renewal.daysRemaining)} dias.`
                                     : `Faltam ${renewal.daysRemaining} dias para vencer.`}
                             </div>
                         </div>

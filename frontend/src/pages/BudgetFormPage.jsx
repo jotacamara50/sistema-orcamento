@@ -87,7 +87,7 @@ export default function BudgetFormPage() {
             return;
         }
         if (file.size > 1024 * 1024) {
-            setError('Logo muito grande. Use ate 1MB.');
+            setError('Logo muito grande. Use até 1MB.');
             return;
         }
         const reader = new FileReader();
@@ -191,7 +191,7 @@ export default function BudgetFormPage() {
                         </div>
 
                         <div className="form-group" style={{ marginTop: 'var(--space-lg)' }}>
-                            <label>Logo do orcamento (opcional)</label>
+                            <label>Logo do orçamento (opcional)</label>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -199,13 +199,13 @@ export default function BudgetFormPage() {
                                 onChange={handleLogoChange}
                             />
                             <div className="text-secondary text-xs" style={{ marginTop: 'var(--space-xs)' }}>
-                                PNG ou JPG ate 1MB.
+                                PNG ou JPG até 1MB.
                             </div>
                             {formData.logo_data && (
                                 <div style={{ marginTop: 'var(--space-sm)', display: 'flex', alignItems: 'center', gap: 'var(--space-md)' }}>
                                     <img
                                         src={formData.logo_data}
-                                        alt="Logo do orcamento"
+                                        alt="Logo do orçamento"
                                         style={{ maxHeight: '60px', maxWidth: '180px', objectFit: 'contain', border: '1px solid var(--border)', padding: '4px', borderRadius: '6px' }}
                                     />
                                     <button type="button" className="btn btn-secondary btn-sm" onClick={handleRemoveLogo}>

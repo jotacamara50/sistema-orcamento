@@ -1,4 +1,4 @@
-const SUPPORT_WHATSAPP = '5511999999999'; // Replace with your WhatsApp number
+const SUPPORT_WHATSAPP = '551151923162'; // Replace with your WhatsApp number
 
 export function generateBudgetWhatsAppLink(budget, clientPhone, template) {
     const numero = `#${String(budget.numero).padStart(4, '0')}`;
@@ -23,7 +23,12 @@ export function generateBudgetWhatsAppLink(budget, clientPhone, template) {
 }
 
 export function generateActivationWhatsAppLink(userEmail) {
-    const message = `Olá! Criei meus primeiros orçamentos no sistema e quero ativar minha conta.\nPlano mensal: R$ 79.\nEmail cadastrado: ${userEmail}`;
+    const message = `Ol?! ??
+
+J? utilizei meus 3 or?amentos gratuitos e gostaria de ativar minha conta.
+
+Plano mensal: R$ 39
+Email cadastrado: ${userEmail}`;
 
     const encodedMessage = encodeURIComponent(message);
 

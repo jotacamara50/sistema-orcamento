@@ -16,21 +16,19 @@ export default function Navbar() {
             borderBottom: '1px solid var(--border)',
             position: 'sticky',
             top: 0,
-            zIndex: 100
+            zIndex: 100,
+            overflow: 'visible'
         }}>
             <div className="container" style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
-                height: '64px'
+                height: '72px',
+                padding: 0,
+                overflow: 'visible'
             }}>
-                <Link to="/budgets" style={{
-                    fontSize: '1.25rem',
-                    fontWeight: '700',
-                    color: 'var(--primary)',
-                    textDecoration: 'none'
-                }}>
-                    📊 Orçamentos
+                <Link to="/budgets" className="app-logo" aria-label="OrçaZap">
+                    <img src="/logo1.png" alt="OrçaZap" />
                 </Link>
 
                 <div style={{ display: 'flex', gap: 'var(--space-lg)', alignItems: 'center' }}>

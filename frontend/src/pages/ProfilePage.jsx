@@ -8,7 +8,7 @@ const SERVICE_OPTIONS = [
     'Ar Condicionado',
     'TI / Suporte',
     'Reformas',
-    'Automacao',
+    'Automação',
     'Outro'
 ];
 
@@ -60,7 +60,7 @@ export default function ProfilePage() {
                 <div className="mb-xl">
                     <h1>Meu Perfil</h1>
                     <p className="text-secondary text-sm">
-                        Esses dados aparecem nos PDFs de orcamento.
+                        Esses dados aparecem nos PDFs de orçamento.
                     </p>
                 </div>
 
@@ -103,7 +103,7 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="form-group">
-                            <label>Tipo de servico</label>
+                            <label>Tipo de serviço</label>
                             <select
                                 className="select"
                                 value={formData.tipo_servico}
@@ -119,7 +119,7 @@ export default function ProfilePage() {
                         </div>
 
                         <div className="form-group">
-                            <label>Cor do orcamento (hex)</label>
+                            <label>Cor do orçamento (hex)</label>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-sm)' }}>
                                 <input
                                     type="text"

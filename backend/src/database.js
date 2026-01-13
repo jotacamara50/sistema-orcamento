@@ -5,8 +5,10 @@ import { dirname, join } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const db = new Database(join(__dirname, '..', 'orcamentos.db'));
+const DB_PATH = process.env.DB_PATH || join(__dirname, '..', 'orcamentos.db');
+const db = new Database(DB_PATH);
 const DEFAULT_BRAND_COLOR = '#2563eb';
+export const DEFAULT_WHATSAPP_TEMPLATE = 'Olá {{cliente}}, tudo bem?\n\nSegue o orçamento {{numero}} no valor de {{total}}.\n\nFico à disposição para qualquer dúvida.';
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -23,7 +25,7 @@ function initializeDatabase() {
       telefone TEXT,
       tipo_servico TEXT,
       brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}',
-      whatsapp_template TEXT DEFAULT 'Olá {{cliente}}, segue o orçamento {{numero}} no valor de {{total}}. Qualquer dúvida fico à disposição.',
+      whatsapp_template TEXT DEFAULT '${DEFAULT_WHATSAPP_TEMPLATE}',
       is_paid INTEGER DEFAULT 0,
       paid_until TEXT,
       trial_budget_count INTEGER DEFAULT 0,
@@ -37,9 +39,21 @@ function initializeDatabase() {
     db.exec(`ALTER TABLE users ADD COLUMN brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}'`);
   }
 
+  if (!userColumns.includes('whatsapp_template')) {
+    db.exec(`ALTER TABLE users ADD COLUMN whatsapp_template TEXT DEFAULT '${DEFAULT_WHATSAPP_TEMPLATE}'`);
+  }
+
   if (!userColumns.includes('paid_until')) {
     db.exec('ALTER TABLE users ADD COLUMN paid_until TEXT');
   }
+
+  const legacyTemplates = [
+    'Olá {{cliente}}, segue o orçamento {{numero}} no valor de {{total}}. Qualquer dúvida fico à disposição.'
+  ];
+  const placeholders = legacyTemplates.map(() => '?').join(', ');
+  db.prepare(
+    `UPDATE users SET whatsapp_template = ? WHERE whatsapp_template IS NULL OR whatsapp_template = '' OR whatsapp_template IN (${placeholders})`
+  ).run(DEFAULT_WHATSAPP_TEMPLATE, ...legacyTemplates);
 
   // Clients table
   db.exec(`

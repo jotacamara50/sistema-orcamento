@@ -17,134 +17,183 @@ export function generateBudgetPDF(budget, user) {
             const formattedDate = date.toLocaleDateString('pt-BR');
             const logoBuffer = getLogoBuffer(budget.logo_data);
 
-            // Header
-            doc.fillColor(accentColor)
-                .rect(50, 32, doc.page.width - 100, 3)
-                .fill();
-            if (logoBuffer) {
-                doc.image(logoBuffer, 50, 38, { fit: [90, 45] });
-                doc.moveDown(0.6);
-            }
-            doc.fillColor(accentColor).fontSize(22).font('Helvetica-Bold').text('OR\u00c7AMENTO', { align: 'center' });
-            doc.moveDown(0.5);
-            const metaY = doc.y;
-            doc.fontSize(10).font('Helvetica-Bold');
-            doc.text(`Or\u00e7amento #${String(budget.numero).padStart(4, '0')}`, 50, metaY, { width: 250 });
-            doc.text(formattedDate, 300, metaY, { width: 240, align: 'right' });
-            doc.fillColor('black');
-            doc.moveDown(1.6);
-
-            // User and client info
-            const leftX = 50;
+            const pageMargin = doc.page.margins.left;
+            const pageWidth = doc.page.width;
+            const pageHeight = doc.page.height;
+            const contentWidth = pageWidth - pageMargin * 2;
             const columnGap = 20;
-            const contentWidth = doc.page.width - 100;
             const columnWidth = (contentWidth - columnGap) / 2;
+            const leftX = pageMargin;
             const rightX = leftX + columnWidth + columnGap;
-            const blockTopY = doc.y;
+            const baseTextColor = '#111827';
+            const mutedTextColor = '#6b7280';
 
-            doc.fontSize(11).font('Helvetica-Bold').fillColor(accentColor);
-            doc.text('Prestador', leftX, blockTopY, { width: columnWidth });
-            doc.text('Cliente', rightX, blockTopY, { width: columnWidth });
-            doc.fillColor('black');
+            let cursorY = pageMargin;
 
-            let leftY = blockTopY + doc.currentLineHeight() + 8;
-            let rightY = blockTopY + doc.currentLineHeight() + 8;
-
-            doc.fontSize(12).font('Helvetica-Bold').text(user.nome, leftX, leftY, { width: columnWidth });
-            leftY += doc.currentLineHeight() + 2;
-
-            const formattedUserPhone = formatPhone(user.telefone);
-            if (formattedUserPhone) {
-                doc.fontSize(10).font('Helvetica').text(`Telefone: ${formattedUserPhone}`, leftX, leftY, { width: columnWidth });
-                leftY += doc.currentLineHeight() + 2;
-            }
-            if (user.email) {
-                doc.fontSize(9).text(`Email: ${user.email}`, leftX, leftY, { width: columnWidth });
-                leftY += doc.currentLineHeight() + 2;
-            }
-            if (user.tipo_servico) {
-                doc.fontSize(9).text(`Servi\u00e7o: ${user.tipo_servico}`, leftX, leftY, { width: columnWidth });
-                leftY += doc.currentLineHeight() + 2;
+            if (logoBuffer) {
+                doc.image(logoBuffer, pageWidth - pageMargin - 90, cursorY, { fit: [90, 40] });
             }
 
-            doc.fontSize(12).font('Helvetica-Bold').text(budget.client_nome, rightX, rightY, { width: columnWidth });
-            rightY += doc.currentLineHeight() + 2;
+            doc.fillColor(baseTextColor).fontSize(20).font('Helvetica-Bold').text('OR\u00c7AMENTO', leftX, cursorY);
+            const titleHeight = doc.currentLineHeight();
+            doc.fontSize(9).font('Helvetica').fillColor(mutedTextColor)
+                .text(`Data: ${formattedDate}`, leftX, cursorY + titleHeight + 4);
 
+            cursorY += titleHeight + 18;
+            doc.strokeColor(accentColor).lineWidth(1).moveTo(leftX, cursorY).lineTo(leftX + contentWidth, cursorY).stroke();
+            cursorY += 12;
+
+            const formattedUserPhone = formatPhone(user?.telefone);
             const formattedClientPhone = formatPhone(budget.client_telefone);
-            if (formattedClientPhone) {
-                doc.fontSize(10).font('Helvetica').text(`Telefone: ${formattedClientPhone}`, rightX, rightY, { width: columnWidth });
-                rightY += doc.currentLineHeight() + 2;
-            }
-            if (budget.client_email) {
-                doc.fontSize(9).text(`Email: ${budget.client_email}`, rightX, rightY, { width: columnWidth });
-                rightY += doc.currentLineHeight() + 2;
+            const cardPadding = 12;
+            const cardGap = 16;
+            const cardWidth = (contentWidth - cardGap) / 2;
+            const cardInnerWidth = cardWidth - cardPadding * 2;
+
+            const buildInfoLines = ({ title, name, service, phone, email }) => {
+                const lines = [
+                    { text: title, font: 'Helvetica-Bold', size: 9, color: accentColor, spacing: 6 },
+                    { text: name || '-', font: 'Helvetica-Bold', size: 12, color: baseTextColor, spacing: 2 }
+                ];
+                if (service) {
+                    lines.push({ text: service, font: 'Helvetica', size: 10, color: baseTextColor, spacing: 4 });
+                }
+                if (phone) {
+                    lines.push({ text: `WhatsApp: ${phone}`, font: 'Helvetica', size: 9, color: accentColor, spacing: 4 });
+                }
+                if (email) {
+                    lines.push({ text: `Email: ${email}`, font: 'Helvetica', size: 9, color: accentColor, spacing: 0 });
+                }
+                lines[lines.length - 1].spacing = 0;
+                return lines;
+            };
+
+            const providerLines = buildInfoLines({
+                title: 'Prestador',
+                name: user?.nome,
+                service: user?.tipo_servico,
+                phone: formattedUserPhone,
+                email: user?.email
+            });
+
+            const clientLines = buildInfoLines({
+                title: 'Cliente',
+                name: budget.client_nome,
+                phone: formattedClientPhone,
+                email: budget.client_email
+            });
+
+            const measureLine = (line) => {
+                doc.font(line.font).fontSize(line.size);
+                return doc.heightOfString(line.text, { width: cardInnerWidth });
+            };
+
+            const getBlockHeight = (lines) => {
+                let height = cardPadding * 2;
+                for (const line of lines) {
+                    height += measureLine(line) + line.spacing;
+                }
+                return height;
+            };
+
+            const drawBlock = (x, y, height, lines) => {
+                doc.fillColor('#f8fafc').roundedRect(x, y, cardWidth, height, 6).fill();
+                doc.strokeColor('#e5e7eb').roundedRect(x, y, cardWidth, height, 6).stroke();
+
+                let textY = y + cardPadding;
+                for (const line of lines) {
+                    doc.font(line.font).fontSize(line.size).fillColor(line.color)
+                        .text(line.text, x + cardPadding, textY, { width: cardInnerWidth });
+                    textY += doc.heightOfString(line.text, { width: cardInnerWidth }) + line.spacing;
+                }
+                doc.fillColor(baseTextColor);
+            };
+
+            const leftHeight = getBlockHeight(providerLines);
+            const rightHeight = getBlockHeight(clientLines);
+            const cardHeight = Math.max(leftHeight, rightHeight);
+            const rightCardX = leftX + cardWidth + cardGap;
+
+            drawBlock(leftX, cursorY, cardHeight, providerLines);
+            drawBlock(rightCardX, cursorY, cardHeight, clientLines);
+
+            cursorY += cardHeight + 16;
+
+            if (budget.observacoes) {
+                doc.fontSize(9).font('Helvetica-Bold').fillColor(accentColor)
+                    .text('Descri\u00e7\u00e3o do Servi\u00e7o', leftX, cursorY);
+                doc.fillColor(baseTextColor).fontSize(10).font('Helvetica')
+                    .text(budget.observacoes, leftX, cursorY + 12, { width: contentWidth });
+                cursorY = doc.y + 12;
             }
 
-            doc.y = Math.max(leftY, rightY) + 28;
+            doc.fontSize(10).font('Helvetica-Bold').fillColor(accentColor).text('Itens', leftX, cursorY);
+            cursorY = doc.y + 8;
 
-            // Items table header
-            doc.fontSize(12).font('Helvetica-Bold').fillColor(accentColor).text('Itens');
-            doc.fillColor('black');
-            doc.moveDown(0.8);
-            const tableTop = doc.y;
+            const descWidth = Math.round(contentWidth * 0.52);
+            const qtyWidth = 55;
+            const unitWidth = 90;
+            const totalWidth = contentWidth - descWidth - qtyWidth - unitWidth;
+            const descX = leftX;
+            const qtyX = descX + descWidth;
+            const unitX = qtyX + qtyWidth;
+            const totalX = unitX + unitWidth;
             const headerHeight = 18;
-            doc.fillColor('#f5f5f5').rect(50, tableTop - 4, 490, headerHeight).fill();
-            doc.fontSize(10).font('Helvetica-Bold').fillColor(accentColor);
-            doc.text('Descri\u00e7\u00e3o', 50, tableTop, { width: 250 });
-            doc.text('Qtd', 310, tableTop, { width: 50, align: 'center' });
-            doc.text('Valor Unit.', 370, tableTop, { width: 80, align: 'right' });
-            doc.text('Total', 460, tableTop, { width: 80, align: 'right' });
 
-            doc.strokeColor(accentColor).lineWidth(1.2).moveTo(50, tableTop + 15).lineTo(540, tableTop + 15).stroke();
-            doc.lineWidth(1);
-            doc.fillColor('black');
+            const drawTableHeader = () => {
+                doc.fillColor('#f3f4f6').rect(leftX, cursorY, contentWidth, headerHeight).fill();
+                doc.fontSize(9).font('Helvetica-Bold').fillColor(accentColor);
+                doc.text('Descri\u00e7\u00e3o', descX + 6, cursorY + 4, { width: descWidth - 8 });
+                doc.text('Qtd', qtyX, cursorY + 4, { width: qtyWidth, align: 'center' });
+                doc.text('Valor unit\u00e1rio', unitX, cursorY + 4, { width: unitWidth, align: 'right' });
+                doc.text('Total do item', totalX, cursorY + 4, { width: totalWidth, align: 'right' });
+                doc.fillColor(baseTextColor).font('Helvetica');
+                cursorY += headerHeight + 6;
+            };
 
-            let y = tableTop + 25;
-            doc.font('Helvetica');
+            drawTableHeader();
 
-            // Items
             for (const item of budget.items) {
                 const itemTotal = item.quantidade * item.valor_unitario;
+                const description = item.descricao || '-';
+                const descriptionHeight = doc.heightOfString(description, { width: descWidth - 8 });
+                const rowHeight = Math.max(descriptionHeight, doc.currentLineHeight());
+                const bottomLimit = pageHeight - pageMargin - 80;
 
-                doc.text(item.descricao, 50, y, { width: 250 });
-                doc.text(item.quantidade.toString(), 310, y, { width: 50, align: 'center' });
-                doc.text(formatCurrency(item.valor_unitario), 370, y, { width: 80, align: 'right' });
-                doc.text(formatCurrency(itemTotal), 460, y, { width: 80, align: 'right' });
-
-                y += 25;
-
-                // Add new page if needed
-                if (y > 700) {
+                if (cursorY + rowHeight > bottomLimit) {
                     doc.addPage();
-                    y = 50;
+                    cursorY = pageMargin;
+                    drawTableHeader();
                 }
+
+                doc.fontSize(9).fillColor(baseTextColor).text(description, descX + 6, cursorY, { width: descWidth - 8 });
+                doc.text(String(item.quantidade), qtyX, cursorY, { width: qtyWidth, align: 'center' });
+                doc.text(formatCurrency(item.valor_unitario), unitX, cursorY, { width: unitWidth, align: 'right' });
+                doc.text(formatCurrency(itemTotal), totalX, cursorY, { width: totalWidth, align: 'right' });
+
+                cursorY += rowHeight + 8;
             }
 
-            doc.strokeColor('black').moveTo(50, y).lineTo(540, y).stroke();
-            y += 15;
+            doc.strokeColor('#e5e7eb').lineWidth(1).moveTo(leftX, cursorY).lineTo(leftX + contentWidth, cursorY).stroke();
+            cursorY += 10;
 
-            // Total
-            doc.fontSize(12).font('Helvetica-Bold');
-            doc.text('TOTAL:', 370, y, { width: 80, align: 'right' });
-            doc.fillColor(accentColor).fontSize(14).text(formatCurrency(budget.total), 460, y, { width: 80, align: 'right' });
-            doc.fillColor('black');
+            doc.fontSize(11).font('Helvetica-Bold').fillColor(baseTextColor);
+            doc.text('TOTAL:', unitX, cursorY, { width: unitWidth, align: 'right' });
+            doc.fillColor(accentColor).fontSize(12)
+                .text(formatCurrency(budget.total), totalX, cursorY, { width: totalWidth, align: 'right' });
+            doc.fillColor(baseTextColor);
 
-            // Observations
-            if (budget.observacoes) {
-                doc.moveDown(2);
-                doc.fillColor(accentColor);
-                doc.fontSize(10).font('Helvetica-Bold').text('Observa\u00e7\u00f5es:');
-                doc.fillColor('black');
-                doc.fontSize(9).font('Helvetica').text(budget.observacoes, { width: 490 });
+            const contactText = formattedUserPhone
+                ? `Para aprovar este or\u00e7amento, entre em contato pelo WhatsApp:\n${formattedUserPhone}`
+                : 'Para aprovar este or\u00e7amento, entre em contato pelo WhatsApp.';
+            const footerHeight = doc.heightOfString(contactText, { width: contentWidth, align: 'center' });
+            let footerY = pageHeight - pageMargin - footerHeight;
+            if (cursorY + 24 > footerY) {
+                doc.addPage();
+                footerY = doc.page.height - pageMargin - footerHeight;
             }
-
-            // Footer
-            doc.fontSize(8).font('Helvetica').text(
-                'Or\u00e7amento v\u00e1lido por 30 dias',
-                50,
-                doc.page.height - 50,
-                { align: 'center' }
-            );
+            doc.fontSize(9).font('Helvetica').fillColor(mutedTextColor)
+                .text(contactText, leftX, footerY, { width: contentWidth, align: 'center' });
 
             doc.end();
         } catch (error) {

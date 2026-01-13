@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
+import HomePage from './pages/HomePage';
+import TermsPage from './pages/TermsPage';
+import PrivacyPage from './pages/PrivacyPage';
 import BudgetListPage from './pages/BudgetListPage';
 import BudgetFormPage from './pages/BudgetFormPage';
 import BudgetViewPage from './pages/BudgetViewPage';
@@ -13,7 +16,11 @@ export default function App() {
         <AuthProvider>
             <BrowserRouter>
                 <Routes>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/termos" element={<TermsPage />} />
+                    <Route path="/privacidade" element={<PrivacyPage />} />
                     <Route path="/login" element={<LoginPage />} />
+                    <Route path="/register" element={<LoginPage defaultRegister />} />
 
                     <Route path="/budgets" element={
                         <ProtectedRoute>
@@ -51,7 +58,7 @@ export default function App() {
                         </ProtectedRoute>
                     } />
 
-                    <Route path="/" element={<Navigate to="/budgets" replace />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
             </BrowserRouter>
         </AuthProvider>

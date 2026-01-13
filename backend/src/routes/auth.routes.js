@@ -1,6 +1,6 @@
 import express from 'express';
 import bcrypt from 'bcrypt';
-import db from '../database.js';
+import db, { DEFAULT_WHATSAPP_TEMPLATE } from '../database.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -48,9 +48,9 @@ router.post('/register', async (req, res) => {
 
         // Insert user
         const result = db.prepare(`
-      INSERT INTO users (email, password_hash, nome, telefone, tipo_servico)
-      VALUES (?, ?, ?, ?, ?)
-    `).run(email, password_hash, nome, telefone || null, tipo_servico || null);
+      INSERT INTO users (email, password_hash, nome, telefone, tipo_servico, whatsapp_template)
+      VALUES (?, ?, ?, ?, ?, ?)
+    `).run(email, password_hash, nome, telefone || null, tipo_servico || null, DEFAULT_WHATSAPP_TEMPLATE);
 
         const token = generateToken({ id: result.lastInsertRowid, email });
         const createdUser = db.prepare(`

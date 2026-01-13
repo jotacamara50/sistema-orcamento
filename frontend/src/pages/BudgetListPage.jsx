@@ -180,14 +180,14 @@ export default function BudgetListPage() {
                 <div style={{
                     display: 'grid',
                     gap: 'var(--space-md)',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
                     marginBottom: 'var(--space-lg)'
                 }}>
                     <div className="card" style={{ borderLeft: '6px solid #16a34a' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
                             Aprovados este mês
                         </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#16a34a' }}>
+                        <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#16a34a' }}>
                             {formatCurrency(stats.approvedTotal)}
                         </div>
                     </div>
@@ -196,7 +196,7 @@ export default function BudgetListPage() {
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
                             Pendentes
                         </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#b45309' }}>
+                        <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#b45309' }}>
                             {formatCurrency(stats.pendingTotal)}
                         </div>
                     </div>
@@ -205,18 +205,17 @@ export default function BudgetListPage() {
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
                             Taxa de conversão
                         </div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#0ea5e9' }}>
+                        <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#0ea5e9' }}>
                             {Math.round(stats.conversionRate * 100)}%
                         </div>
                     </div>
                 </div>
 
                 {renewal && (
-                    <div className="card" style={{
+                    <div className="card renewal-card" style={{
                         display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        gap: 'var(--space-lg)',
+                        flexDirection: 'column',
+                        gap: 'var(--space-md)',
                         marginBottom: 'var(--space-lg)',
                         background: isExpired ? '#fef2f2' : (isExpiringSoon ? '#fef9c3' : '#eff6ff'),
                         borderLeft: isExpired ? '6px solid #dc2626' : (isExpiringSoon ? '6px solid #f59e0b' : '6px solid #0ea5e9')
@@ -237,6 +236,7 @@ export default function BudgetListPage() {
                                 onClick={handleRenew}
                                 className="btn btn-primary"
                                 disabled={renewLoading}
+                                style={{ width: '100%', maxWidth: '300px' }}
                             >
                                 {renewLoading ? 'Abrindo...' : 'Renovar no WhatsApp'}
                             </button>
@@ -244,7 +244,12 @@ export default function BudgetListPage() {
                     </div>
                 )}
 
-                <div className="flex justify-between items-center mb-xl">
+                <div className="budget-header" style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--space-md)',
+                    marginBottom: 'var(--space-xl)'
+                }}>
                     <div>
                         <h1>Orçamentos</h1>
                         {!isPaidActive && (
@@ -253,11 +258,15 @@ export default function BudgetListPage() {
                             </span>
                         )}
                     </div>
-                    <div className="flex gap-md">
-                        <Link to="/clients" className="btn btn-secondary">
+                    <div className="budget-actions" style={{
+                        display: 'flex',
+                        gap: 'var(--space-md)',
+                        flexWrap: 'wrap'
+                    }}>
+                        <Link to="/clients" className="btn btn-secondary" style={{ flex: '1 1 auto', minWidth: '140px' }}>
                             Gerenciar Clientes
                         </Link>
-                        <button onClick={handleNewBudget} className="btn btn-primary">
+                        <button onClick={handleNewBudget} className="btn btn-primary" style={{ flex: '1 1 auto', minWidth: '140px' }}>
                             + Novo Orçamento
                         </button>
                     </div>
@@ -283,10 +292,20 @@ export default function BudgetListPage() {
                                 to={`/budgets/${budget.id}`}
                                 style={{ textDecoration: 'none', color: 'inherit' }}
                             >
-                                <div className="card" style={{ transition: 'transform 0.2s' }}>
-                                    <div className="flex justify-between items-center">
-                                        <div>
-                                            <div className="flex items-center gap-md mb-sm">
+                                <div className="card budget-card" style={{ transition: 'transform 0.2s' }}>
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: 'var(--space-md)'
+                                    }}>
+                                        <div style={{ flex: 1 }}>
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: 'var(--space-md)',
+                                                marginBottom: 'var(--space-sm)',
+                                                flexWrap: 'wrap'
+                                            }}>
                                                 <h3>Orçamento #{String(budget.numero).padStart(4, '0')}</h3>
                                                 <StatusBadge status={budget.status} />
                                             </div>
@@ -297,8 +316,15 @@ export default function BudgetListPage() {
                                                 {formatDate(budget.data)}
                                             </p>
                                         </div>
-                                        <div style={{ textAlign: 'right' }}>
-                                            <div style={{ fontSize: '1.5rem', fontWeight: '700', color: 'var(--primary)' }}>
+                                        <div style={{
+                                            display: 'flex',
+                                            justifyContent: 'space-between',
+                                            alignItems: 'center',
+                                            gap: 'var(--space-md)',
+                                            paddingTop: 'var(--space-sm)',
+                                            borderTop: '1px solid var(--border)'
+                                        }}>
+                                            <div style={{ fontSize: 'clamp(1.25rem, 5vw, 1.5rem)', fontWeight: '700', color: 'var(--primary)' }}>
                                                 {formatCurrency(budget.total)}
                                             </div>
                                             <button
@@ -309,7 +335,6 @@ export default function BudgetListPage() {
                                                     handleDuplicate(budget.id);
                                                 }}
                                                 className="btn btn-secondary btn-sm"
-                                                style={{ marginTop: 'var(--space-sm)' }}
                                                 disabled={duplicatingId === budget.id}
                                             >
                                                 {duplicatingId === budget.id ? 'Duplicando...' : 'Duplicar'}

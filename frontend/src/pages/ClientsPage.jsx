@@ -82,9 +82,14 @@ export default function ClientsPage() {
             <Navbar />
 
             <div className="container page">
-                <div className="flex justify-between items-center mb-xl">
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--space-md)',
+                    marginBottom: 'var(--space-xl)'
+                }}>
                     <h1>Clientes</h1>
-                    <button onClick={() => handleOpenModal()} className="btn btn-primary">
+                    <button onClick={() => handleOpenModal()} className="btn btn-primary" style={{ alignSelf: 'flex-start', minWidth: '160px' }}>
                         + Novo Cliente
                     </button>
                 </div>
@@ -103,7 +108,7 @@ export default function ClientsPage() {
                     </div>
                 ) : (
                     <div className="card">
-                        <table className="table">
+                        <table className="table table-responsive">
                             <thead>
                                 <tr>
                                     <th>Nome</th>
@@ -115,10 +120,10 @@ export default function ClientsPage() {
                             <tbody>
                                 {clients.map(client => (
                                     <tr key={client.id}>
-                                        <td><strong>{client.nome}</strong></td>
-                                        <td>{client.telefone || '-'}</td>
-                                        <td>{client.email || '-'}</td>
-                                        <td>
+                                        <td data-label="Nome"><strong>{client.nome}</strong></td>
+                                        <td data-label="Telefone">{client.telefone || '-'}</td>
+                                        <td data-label="Email">{client.email || '-'}</td>
+                                        <td data-label="Ações">
                                             <div className="flex gap-sm">
                                                 <button
                                                     onClick={() => handleOpenModal(client)}
@@ -182,11 +187,11 @@ export default function ClientsPage() {
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-md">
-                                <button type="button" onClick={handleCloseModal} className="btn btn-secondary">
+                            <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+                                <button type="button" onClick={handleCloseModal} className="btn btn-secondary" style={{ flex: 1 }}>
                                     Cancelar
                                 </button>
-                                <button type="submit" className="btn btn-primary">
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
                                     Salvar
                                 </button>
                             </div>

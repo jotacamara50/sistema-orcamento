@@ -8,10 +8,6 @@ export default function SiteLayout({ children }) {
                     <Link to="/" className="site-logo" aria-label="OrçaZap">
                         <img src="/logo1.png" alt="OrçaZap" className="site-logo-image" />
                     </Link>
-                    <div className="site-header-actions">
-                        <Link to="/login" className="btn btn-secondary btn-sm">Entrar</Link>
-                        <Link to="/register" className="btn btn-primary btn-sm">Criar conta</Link>
-                    </div>
                 </div>
             </header>
             <main className="site-main">

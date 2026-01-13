@@ -20,7 +20,7 @@ export default function TrialBlockModal({ onClose }) {
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)' }}>
                         Para continuar enviando orçamentos em PDF e fechar mais serviços,
-                        ative sua conta por <strong>R$ 79/mês</strong>.
+                        ative sua conta por <strong>R$ 39/mês</strong>.
                     </p>
 
                     <div style={{

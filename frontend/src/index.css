@@ -107,6 +107,15 @@ h4 { font-size: 1rem; font-weight: 600; }
   background: #dc2626;
 }
 
+.btn-whatsapp {
+  background: #25d366;
+  color: white;
+}
+
+.btn-whatsapp:hover {
+  background: #1fb855;
+}
+
 .btn-sm {
   padding: 0.375rem 0.875rem;
   font-size: 0.8125rem;
@@ -736,8 +745,8 @@ h4 { font-size: 1rem; font-weight: 600; }
   }
 
   .app-logo img {
-    width: 80px;
-    height: 80px;
+    width: 100px;
+    height: 100px;
   }
 
   /* Botões responsivos */
@@ -799,15 +808,16 @@ h4 { font-size: 1rem; font-weight: 600; }
   /* Site institucional */
   .site-header-inner {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
     height: auto;
-    padding: var(--space-md) 0;
-    gap: var(--space-md);
+    padding: var(--space-sm) 0;
+    gap: 0;
   }
 
   .site-logo-image {
-    width: 100px;
-    height: 100px;
+    width: 140px;
+    height: 140px;
   }
 
   .auth-logo {

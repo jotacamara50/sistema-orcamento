@@ -110,25 +110,30 @@ export default function BudgetViewPage() {
             <Navbar />
 
             <div className="container page">
-                <div className="flex justify-between items-center mb-xl">
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 'var(--space-md)',
+                    marginBottom: 'var(--space-xl)'
+                }}>
                     <div>
                         <h1>Orçamento #{String(budget.numero).padStart(4, '0')}</h1>
-                        <div className="flex gap-md items-center mt-sm">
+                        <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center', marginTop: 'var(--space-sm)', flexWrap: 'wrap' }}>
                             <StatusBadge status={budget.status} />
                             <span className="text-sm text-secondary">{formatDate(budget.data)}</span>
                         </div>
                     </div>
-                    <Link to="/budgets" className="btn btn-secondary">← Voltar</Link>
+                    <Link to="/budgets" className="btn btn-secondary" style={{ alignSelf: 'flex-start', minWidth: '120px' }}>← Voltar</Link>
                 </div>
 
                 {/* Actions */}
                 <div className="card mb-lg">
                     <h3 className="mb-md">Ações</h3>
-                    <div className="flex gap-md" style={{ flexWrap: 'wrap' }}>
+                    <div style={{ display: 'grid', gap: 'var(--space-md)', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
                         <button onClick={handleDownloadPDF} className="btn btn-primary">
                             📄 Baixar PDF
                         </button>
-                        <button onClick={handleWhatsApp} className="btn btn-success" style={{ background: '#10b981' }}>
+                        <button onClick={handleWhatsApp} className="btn btn-whatsapp">
                             📱 Enviar WhatsApp
                         </button>
                         <Link to={`/budgets/${id}/edit`} className="btn btn-secondary">
@@ -143,7 +148,7 @@ export default function BudgetViewPage() {
                 {/* Status */}
                 <div className="card mb-lg">
                     <h3 className="mb-md">Alterar Status</h3>
-                    <div className="flex gap-sm" style={{ flexWrap: 'wrap' }}>
+                    <div style={{ display: 'grid', gap: 'var(--space-sm)', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))' }}>
                         {['rascunho', 'enviado', 'aprovado', 'recusado'].map(status => (
                             <button
                                 key={status}

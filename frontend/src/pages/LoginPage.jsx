@@ -58,7 +58,7 @@ export default function LoginPage({ defaultRegister = false }) {
         }}>
             <div className="card" style={{ maxWidth: '420px', width: '100%', margin: 'var(--space-md)', padding: 'var(--space-lg)' }}>
                 <div style={{ textAlign: 'center', marginBottom: 'var(--space-md)' }}>
-                    <img src="/logo1.png" alt="OrçaZap" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto var(--space-xs)' }} />
+                    <img src="/logo1.png" alt="OrçaZap" className="auth-logo" />
                     <h1 style={{ marginBottom: 'var(--space-xs)', fontSize: '1.5rem' }}>
                         {isRegister ? 'Cadastro' : 'Entrar'}
                     </h1>

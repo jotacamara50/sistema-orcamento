@@ -26,7 +26,7 @@ export default function Navbar() {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 minHeight: '72px',
-                padding: 'var(--space-md) var(--space-lg)',
+                padding: 'var(--space-sm) var(--space-lg)',
                 overflow: 'visible'
             }}>
                 <Link to="/budgets" className="app-logo" aria-label="OrçaZap">

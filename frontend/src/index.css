@@ -745,8 +745,8 @@ h4 { font-size: 1rem; font-weight: 600; }
   }
 
   .app-logo img {
-    width: 100px;
-    height: 100px;
+    width: 120px;
+    height: 120px;
   }
 
   /* Botões responsivos */
@@ -816,13 +816,13 @@ h4 { font-size: 1rem; font-weight: 600; }
   }
 
   .site-logo-image {
-    width: 140px;
-    height: 140px;
+    width: 160px;
+    height: 160px;
   }
 
   .auth-logo {
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
   }
 
   .site-hero {

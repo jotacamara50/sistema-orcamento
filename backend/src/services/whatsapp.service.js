@@ -23,11 +23,14 @@ export function generateBudgetWhatsAppLink(budget, clientPhone, template) {
 }
 
 export function generateActivationWhatsAppLink(userEmail) {
-    const message = `Olá! 👋
+    const message = `Olá!
 
 Já utilizei meus 3 orçamentos gratuitos e gostaria de ativar minha conta.
 
-Plano mensal: R$ 39
+Planos disponíveis:
+• Mensal: R$ 39
+• Trimestral: R$ 97
+
 Email cadastrado: ${userEmail}`;
 
     const encodedMessage = encodeURIComponent(message);

@@ -52,17 +52,19 @@ export default function LoginPage({ defaultRegister = false }) {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+            minHeight: '100vh',
+            background: 'var(--bg-gray)',
+            padding: 'var(--space-md) 0'
         }}>
-            <div className="card" style={{ maxWidth: '450px', width: '100%', margin: 'var(--space-lg)' }}>
-                <div style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-                    <img src="/logo1.png" alt="OrçaZap" className="auth-logo" />
-                    <h1 style={{ marginBottom: 'var(--space-sm)' }}>
-                        {isRegister ? 'Criar Conta' : 'Entrar'}
+            <div className="card" style={{ maxWidth: '420px', width: '100%', margin: 'var(--space-md)', padding: 'var(--space-lg)' }}>
+                <div style={{ textAlign: 'center', marginBottom: 'var(--space-md)' }}>
+                    <img src="/logo1.png" alt="OrçaZap" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto var(--space-xs)' }} />
+                    <h1 style={{ marginBottom: 'var(--space-xs)', fontSize: '1.5rem' }}>
+                        {isRegister ? 'Cadastro' : 'Entrar'}
                     </h1>
-                    <p className="text-secondary">
+                    <p className="text-secondary" style={{ fontSize: '0.875rem' }}>
                         {isRegister
-                            ? 'Crie orçamentos profissionais em 2 minutos'
+                            ? 'Crie sua conta - 3 orçamentos grátis'
                             : 'Bem-vindo de volta!'}
                     </p>
                 </div>
@@ -74,21 +76,34 @@ export default function LoginPage({ defaultRegister = false }) {
                 <form onSubmit={handleSubmit}>
                     {isRegister && (
                         <>
-                            <div className="form-group">
-                                <label>Nome completo</label>
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Nome Completo</label>
                                 <input
                                     type="text"
                                     name="nome"
                                     className="input"
-                                    placeholder="Seu nome"
+                                    placeholder="João Silva"
                                     value={formData.nome}
                                     onChange={handleChange}
                                     required
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label>Telefone</label>
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="input"
+                                    placeholder="seu@email.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Telefone</label>
                                 <input
                                     type="tel"
                                     name="telefone"
@@ -99,58 +114,69 @@ export default function LoginPage({ defaultRegister = false }) {
                                 />
                             </div>
 
-                            <div className="form-group">
-                                <label>Tipo de serviço</label>
-                                <select
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Profissão</label>
+                                <input
+                                    type="text"
                                     name="tipo_servico"
-                                    className="select"
+                                    className="input"
+                                    placeholder="Marceneiro, Eletricista..."
                                     value={formData.tipo_servico}
                                     onChange={handleChange}
-                                >
-                                    <option value="">Selecione...</option>
-                                    <option value="Eletricista">Eletricista</option>
-                                    <option value="Ar Condicionado">Ar Condicionado</option>
-                                    <option value="TI / Suporte">TI / Suporte</option>
-                                    <option value="Reformas">Reformas</option>
-                                    <option value="Automação">Automação</option>
-                                    <option value="Outro">Outro</option>
-                                </select>
+                                />
+                            </div>
+
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Senha</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    className="input"
+                                    placeholder="Sua senha"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                />
                             </div>
                         </>
                     )}
 
-                    <div className="form-group">
-                        <label>Email</label>
-                        <input
-                            type="email"
-                            name="email"
-                            className="input"
-                            placeholder="seu@email.com"
-                            value={formData.email}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                    {!isRegister && (
+                        <>
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    className="input"
+                                    placeholder="seu@email.com"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
 
-                    <div className="form-group">
-                        <label>Senha</label>
-                        <input
-                            type="password"
-                            name="password"
-                            className="input"
-                            placeholder="••••••••"
-                            value={formData.password}
-                            onChange={handleChange}
-                            required
-                        />
-                    </div>
+                            <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                                <label style={{ fontSize: '0.8125rem' }}>Senha</label>
+                                <input
+                                    type="password"
+                                    name="password"
+                                    className="input"
+                                    placeholder="••••••••"
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                />
+                            </div>
+                        </>
+                    )}
 
                     <button type="submit" className="btn btn-primary btn-lg" style={{ width: '100%' }} disabled={loading}>
-                        {loading ? 'Aguarde...' : (isRegister ? 'Criar Conta' : 'Entrar')}
+                        {loading ? 'Aguarde...' : (isRegister ? 'Cadastrar' : 'Entrar')}
                     </button>
                 </form>
 
-                <div style={{ textAlign: 'center', marginTop: 'var(--space-lg)' }}>
+                <div style={{ textAlign: 'center', marginTop: 'var(--space-md)' }}>
                     <button
                         onClick={() => {
                             navigate(isRegister ? '/login' : '/register');

@@ -4,17 +4,40 @@ import SiteLayout from '../components/SiteLayout';
 export default function HomePage() {
     return (
         <SiteLayout>
-            <section className="site-hero">
+            <section className="site-hero site-hero-centered">
                 <div className="container site-hero-inner">
-                    <h1>Orçamentos profissionais, sem complicação.</h1>
-                    <p className="site-hero-subtitle text-secondary">
-                        Crie orçamentos em PDF, envie pelo WhatsApp e organize seus serviços em um só lugar.
+                    <p className="site-hero-kicker">Orçamentos profissionais para prestadores de serviço</p>
+                    <h1 className="site-hero-title">Pare de perder tempo fazendo orçamento no WhatsApp</h1>
+                    <p className="site-hero-subtitle">
+                        Gere um PDF bonito com preço e organize tudo em <span className="site-hero-highlight">30 segundos</span>.
                     </p>
                     <div className="site-hero-actions">
                         <Link to="/login" className="btn btn-secondary btn-lg">Entrar</Link>
-                        <Link to="/register" className="btn btn-primary btn-lg">Criar conta</Link>
+                        <Link to="/register" className="btn btn-primary btn-lg">Cadastrar grátis</Link>
                     </div>
                     <p className="site-hero-trust">Sistema online. Sem instalação.</p>
+                </div>
+            </section>
+
+            <section className="site-highlight-section">
+                <div className="container">
+                    <div className="site-card-grid">
+                        <div className="site-card">
+                            <div className="site-card-icon">⚡</div>
+                            <h3>Rápido</h3>
+                            <p>Crie orçamentos profissionais em menos de 1 minuto.</p>
+                        </div>
+                        <div className="site-card">
+                            <div className="site-card-icon">📄</div>
+                            <h3>Profissional</h3>
+                            <p>PDFs com visual limpo que impressionam seus clientes.</p>
+                        </div>
+                        <div className="site-card">
+                            <div className="site-card-icon">💬</div>
+                            <h3>WhatsApp</h3>
+                            <p>Envie o orçamento com um clique e feche mais rápido.</p>
+                        </div>
+                    </div>
                 </div>
             </section>
 

@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api';
-import Navbar from '../components/Navbar';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminPage() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [stats, setStats] = useState(null);
   const [expiringUsers, setExpiringUsers] = useState([]);
@@ -93,22 +96,45 @@ export default function AdminPage() {
     return <span style={{ padding: '4px 8px', fontSize: '0.75rem', borderRadius: '12px', background: '#f3f4f6', color: '#374151' }}>Inativo</span>;
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   if (loading) {
     return (
-      <>
-        <Navbar />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '50vh' }}>
-          <div>Carregando painel...</div>
-        </div>
-      </>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh' }}>
+        <div>Carregando painel...</div>
+      </div>
     );
   }
 
   return (
-    <>
-      <Navbar />
-      <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: 'var(--space-xl) var(--space-lg)' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', marginBottom: 'var(--space-xl)' }}>Painel Administrativo</h1>
+    <div style={{ minHeight: '100vh', background: 'var(--background-secondary)' }}>
+      {/* Header Admin */}
+      <div style={{ 
+        background: 'white', 
+        borderBottom: '1px solid var(--border)', 
+        padding: 'var(--space-lg)',
+        marginBottom: 'var(--space-xl)'
+      }}>
+        <div style={{ 
+          maxWidth: '1400px', 
+          margin: '0 auto', 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center' 
+        }}>
+          <h1 style={{ fontSize: '1.5rem', fontWeight: 'bold', color: 'var(--primary)' }}>
+            🔐 Painel Administrativo
+          </h1>
+          <button onClick={handleLogout} className="btn btn-secondary btn-sm">
+            Sair
+          </button>
+        </div>
+      </div>
+
+      <div className="container" style={{ maxWidth: '1400px', margin: '0 auto', padding: '0 var(--space-lg) var(--space-xl)' }}
 
         {/* Estatísticas */}
         {stats && (
@@ -375,7 +401,7 @@ export default function AdminPage() {
                           style={{ fontSize: '0.75rem' }}
                         >
                           🔄 Renovar 30d
-                        </button>
+      div                  </button>
                         <button
                           onClick={() => activatePlan(user.id, 90)}
                           className="btn btn-sm"

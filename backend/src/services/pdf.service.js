@@ -119,14 +119,6 @@ export function generateBudgetPDF(budget, user) {
 
             cursorY += cardHeight + 16;
 
-            if (budget.observacoes) {
-                doc.fontSize(9).font('Helvetica-Bold').fillColor(accentColor)
-                    .text('Descri\u00e7\u00e3o do Servi\u00e7o', leftX, cursorY);
-                doc.fillColor(baseTextColor).fontSize(10).font('Helvetica')
-                    .text(budget.observacoes, leftX, cursorY + 12, { width: contentWidth });
-                cursorY = doc.y + 12;
-            }
-
             doc.fontSize(10).font('Helvetica-Bold').fillColor(accentColor).text('Itens', leftX, cursorY);
             cursorY = doc.y + 8;
 
@@ -182,6 +174,32 @@ export function generateBudgetPDF(budget, user) {
             doc.fillColor(accentColor).fontSize(12)
                 .text(formatCurrency(budget.total), totalX, cursorY, { width: totalWidth, align: 'right' });
             doc.fillColor(baseTextColor);
+            cursorY += 16;
+
+            if (budget.observacoes) {
+                const obsText = budget.observacoes;
+                const trimmedObs = String(obsText).trim();
+                const hasMultipleLines = trimmedObs.includes('\n');
+                const obsTitle = (hasMultipleLines || trimmedObs.length > 80)
+                    ? 'Observa\u00e7\u00f5es'
+                    : 'Observa\u00e7\u00e3o';
+                const obsTitleHeight = doc.heightOfString(obsTitle, { width: contentWidth });
+                const obsTextHeight = doc.heightOfString(obsText, { width: contentWidth });
+                const obsBlockHeight = obsTitleHeight + obsTextHeight + 10;
+                const footerReserve = 60;
+                const maxY = pageHeight - pageMargin - footerReserve;
+
+                if (cursorY + obsBlockHeight > maxY) {
+                    doc.addPage();
+                    cursorY = pageMargin;
+                }
+
+                doc.fontSize(9).font('Helvetica-Bold').fillColor(accentColor)
+                    .text(obsTitle, leftX, cursorY);
+                doc.fillColor(baseTextColor).fontSize(10).font('Helvetica')
+                    .text(obsText, leftX, cursorY + obsTitleHeight + 6, { width: contentWidth });
+                cursorY = doc.y + 12;
+            }
 
             const contactText = formattedUserPhone
                 ? `Para aprovar este or\u00e7amento, entre em contato pelo WhatsApp:\n${formattedUserPhone}`

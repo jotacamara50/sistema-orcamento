@@ -10,6 +10,7 @@ import BudgetFormPage from './pages/BudgetFormPage';
 import BudgetViewPage from './pages/BudgetViewPage';
 import ClientsPage from './pages/ClientsPage';
 import ProfilePage from './pages/ProfilePage';
+import AdminPage from './pages/AdminPage';
 
 export default function App() {
     return (
@@ -55,6 +56,12 @@ export default function App() {
                     <Route path="/profile" element={
                         <ProtectedRoute>
                             <ProfilePage />
+                        </ProtectedRoute>
+                    } />
+
+                    <Route path="/admin" element={
+                        <ProtectedRoute adminOnly>
+                            <AdminPage />
                         </ProtectedRoute>
                     } />
 

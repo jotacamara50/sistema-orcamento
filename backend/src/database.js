@@ -30,6 +30,7 @@ function initializeDatabase() {
       paid_until TEXT,
       trial_budget_count INTEGER DEFAULT 0,
       trial_blocked_at TEXT,
+      is_admin INTEGER DEFAULT 0,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -45,6 +46,10 @@ function initializeDatabase() {
 
   if (!userColumns.includes('paid_until')) {
     db.exec('ALTER TABLE users ADD COLUMN paid_until TEXT');
+  }
+
+  if (!userColumns.includes('is_admin')) {
+    db.exec('ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0');
   }
 
   const legacyTemplates = [

@@ -54,7 +54,7 @@ router.post('/register', async (req, res) => {
 
         const token = generateToken({ id: result.lastInsertRowid, email });
         const createdUser = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count, is_admin
       FROM users WHERE id = ?
     `).get(result.lastInsertRowid);
         const is_paid_active = isPaidActive(createdUser);
@@ -109,7 +109,8 @@ router.post('/login', async (req, res) => {
                 paid_until: user.paid_until,
                 is_paid: user.is_paid,
                 is_paid_active,
-                trial_budget_count: user.trial_budget_count
+                trial_budget_count: user.trial_budget_count,
+                is_admin: user.is_admin
             }
         });
     } catch (error) {
@@ -122,7 +123,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, (req, res) => {
     try {
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count, is_admin
       FROM users WHERE id = ?
     `).get(req.user.id);
 

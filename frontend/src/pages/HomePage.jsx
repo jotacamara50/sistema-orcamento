@@ -17,35 +17,53 @@ export default function HomePage() {
                     </div>
                     <p className="site-hero-trust">✓ Grátis para começar • ✓ Sem instalação • ✓ Funciona no celular</p>
                     
-                    {/* Imagem do produto */}
-                    <div style={{ marginTop: '3rem', textAlign: 'center' }}>
-                        <img 
-                            src="/produto-mockup.png" 
-                            alt="Exemplo de orçamento profissional em PDF no celular" 
-                            style={{ 
-                                maxWidth: '600px', 
-                                width: '100%', 
-                                borderRadius: '12px',
-                                boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
-                            }}
-                            onError={(e) => {
-                                // Fallback: cria um placeholder visual se a imagem não existir
-                                e.target.style.display = 'none';
-                                e.target.parentElement.innerHTML = `
-                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-                                                padding: 4rem 2rem; 
-                                                border-radius: 12px; 
-                                                color: white;
-                                                max-width: 600px;
-                                                margin: 0 auto;
-                                                box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
-                                        <div style="font-size: 4rem; margin-bottom: 1rem;">📱</div>
-                                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Orçamento Profissional</h3>
-                                        <p style="opacity: 0.9;">PDF pronto em 30 segundos</p>
-                                    </div>
-                                `;
-                            }}
-                        />
+                    {/* Vídeo do produto */}
+                    <div style={{ 
+                        marginTop: '3rem', 
+                        textAlign: 'center',
+                        position: 'relative',
+                        maxWidth: '800px',
+                        margin: '3rem auto 0'
+                    }}>
+                        <div style={{
+                            position: 'relative',
+                            borderRadius: '12px',
+                            overflow: 'hidden',
+                            boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+                        }}>
+                            {/* Barra para cobrir o navegador */}
+                            <div style={{
+                                position: 'absolute',
+                                top: 0,
+                                left: 0,
+                                right: 0,
+                                height: '60px',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                zIndex: 10,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                color: 'white',
+                                fontWeight: 'bold',
+                                fontSize: '1.1rem'
+                            }}>
+                                Veja como é fácil criar um orçamento
+                            </div>
+                            
+                            <video 
+                                autoPlay 
+                                muted 
+                                loop 
+                                playsInline
+                                style={{ 
+                                    width: '100%',
+                                    display: 'block'
+                                }}
+                            >
+                                <source src="/apresentacao.mp4" type="video/mp4" />
+                                Seu navegador não suporta vídeo.
+                            </video>
+                        </div>
                     </div>
                 </div>
             </section>

@@ -28,13 +28,26 @@ export default function BudgetViewPage() {
     const handleDownloadPDF = async () => {
         try {
             const res = await actions.downloadPDF(id);
-            const url = window.URL.createObjectURL(new Blob([res.data]));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `orcamento-${String(budget.numero).padStart(4, '0')}.pdf`);
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            const blob = new Blob([res.data], { type: 'application/pdf' });
+            const url = window.URL.createObjectURL(blob);
+            
+            // Abre em nova aba para permitir impressão ou download
+            const printWindow = window.open(url, '_blank');
+            if (printWindow) {
+                printWindow.onload = () => {
+                    // Limpa a URL após carregar
+                    setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                };
+            } else {
+                // Fallback se popup foi bloqueado: faz download direto
+                const link = document.createElement('a');
+                link.href = url;
+                link.setAttribute('download', `orcamento-${String(budget.numero).padStart(4, '0')}.pdf`);
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                window.URL.revokeObjectURL(url);
+            }
         } catch (error) {
             console.error('Error downloading PDF:', error);
             alert('Erro ao baixar PDF');
@@ -131,7 +144,7 @@ export default function BudgetViewPage() {
                     <h3 className="mb-md">Ações</h3>
                     <div style={{ display: 'grid', gap: 'var(--space-md)', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
                         <button onClick={handleDownloadPDF} className="btn btn-primary">
-                            📄 Baixar PDF
+                            📄 Ver PDF
                         </button>
                         <button onClick={handleWhatsApp} className="btn btn-whatsapp">
                             📱 Enviar WhatsApp

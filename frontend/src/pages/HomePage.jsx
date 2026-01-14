@@ -12,10 +12,41 @@ export default function HomePage() {
                         Gere um PDF bonito com preço e organize tudo em <span className="site-hero-highlight">30 segundos</span>.
                     </p>
                     <div className="site-hero-actions">
-                        <Link to="/login" className="btn btn-secondary btn-lg">Entrar</Link>
-                        <Link to="/register" className="btn btn-primary btn-lg">Cadastrar grátis</Link>
+                        <Link to="/register" className="btn btn-primary btn-lg">Criar meu primeiro orçamento grátis</Link>
+                        <Link to="/login" className="btn btn-secondary btn-lg">Já tenho conta</Link>
                     </div>
-                    <p className="site-hero-trust">Sistema online. Sem instalação.</p>
+                    <p className="site-hero-trust">✓ Grátis para começar • ✓ Sem instalação • ✓ Funciona no celular</p>
+                    
+                    {/* Imagem do produto */}
+                    <div style={{ marginTop: '3rem', textAlign: 'center' }}>
+                        <img 
+                            src="/produto-mockup.png" 
+                            alt="Exemplo de orçamento profissional em PDF no celular" 
+                            style={{ 
+                                maxWidth: '600px', 
+                                width: '100%', 
+                                borderRadius: '12px',
+                                boxShadow: '0 20px 60px rgba(0,0,0,0.15)'
+                            }}
+                            onError={(e) => {
+                                // Fallback: cria um placeholder visual se a imagem não existir
+                                e.target.style.display = 'none';
+                                e.target.parentElement.innerHTML = `
+                                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                                                padding: 4rem 2rem; 
+                                                border-radius: 12px; 
+                                                color: white;
+                                                max-width: 600px;
+                                                margin: 0 auto;
+                                                box-shadow: 0 20px 60px rgba(0,0,0,0.15);">
+                                        <div style="font-size: 4rem; margin-bottom: 1rem;">📱</div>
+                                        <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Orçamento Profissional</h3>
+                                        <p style="opacity: 0.9;">PDF pronto em 30 segundos</p>
+                                    </div>
+                                `;
+                            }}
+                        />
+                    </div>
                 </div>
             </section>
 
@@ -41,37 +72,85 @@ export default function HomePage() {
                 </div>
             </section>
 
-            <section className="site-section">
+            {/* Como funciona - Passo a passo */}
+            <section className="site-section" style={{ background: '#f8f9fa' }}>
                 <div className="container site-section-inner">
-                    <h2>O que é</h2>
-                    <p className="site-section-text">
-                        O OrçaZap é um sistema online para prestadores de serviço criarem orçamentos profissionais
-                        rapidamente e enviarem para seus clientes pelo WhatsApp. Tudo fica organizado em um só lugar,
-                        com visual profissional e foco no dia a dia.
+                    <h2 style={{ textAlign: 'center', marginBottom: '3rem' }}>Como funciona</h2>
+                    <div className="site-card-grid">
+                        <div className="site-card" style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>1️⃣</div>
+                            <h3>Preencha os dados</h3>
+                            <p>Nome do cliente, serviço e valor. Simples assim.</p>
+                        </div>
+                        <div className="site-card" style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>2️⃣</div>
+                            <h3>Gere o PDF</h3>
+                            <p>Um clique e pronto. PDF bonito e profissional.</p>
+                        </div>
+                        <div className="site-card" style={{ textAlign: 'center' }}>
+                            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>3️⃣</div>
+                            <h3>Envie no Zap</h3>
+                            <p>Mande direto pro WhatsApp do cliente e feche o serviço.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Para quem - melhorado */}
+            <section className="site-section">
+                <div className="container site-section-inner" style={{ textAlign: 'center' }}>
+                    <h2>Feito para você que trabalha com serviços</h2>
+                    <p style={{ fontSize: '1.2rem', marginTop: '1rem', color: '#666' }}>
+                        ⚡ Eletricistas • 🔧 Técnicos • 🏗️ Pedreiros • 🛠️ Maridos de Aluguel • 🎨 Pintores • 🚿 Encanadores
+                    </p>
+                    <p style={{ marginTop: '1.5rem', fontSize: '1.1rem' }}>
+                        Se você faz orçamento pelo WhatsApp, esse sistema foi feito pra você.
                     </p>
                 </div>
             </section>
 
-            <section className="site-section">
+            {/* Principais recursos */}
+            <section className="site-section" style={{ background: '#f8f9fa' }}>
                 <div className="container site-section-inner">
-                    <h2>Para quem</h2>
+                    <h2 style={{ textAlign: 'center', marginBottom: '2rem' }}>Principais recursos</h2>
                     <ul className="site-list">
-                        <li>Prestadores de serviço em geral</li>
-                        <li>Eletricistas e técnicos</li>
-                        <li>Manutenção e reformas</li>
+                        <li>✓ Visual profissional de orçamentos</li>
+                        <li>✓ Criação de orçamentos em PDF</li>
+                        <li>✓ Envio pelo WhatsApp</li>
+                        <li>✓ Controle simples de orçamentos</li>
+                        <li>✓ Cadastro de clientes</li>
+                        <li>✓ Funciona no celular e computador</li>
                     </ul>
                 </div>
             </section>
 
-            <section className="site-section">
-                <div className="container site-section-inner">
-                    <h2>Principais recursos</h2>
-                    <ul className="site-list">
-                        <li>Visual profissional de orçamentos</li>
-                        <li>Criação de orçamentos em PDF</li>
-                        <li>Envio pelo WhatsApp</li>
-                        <li>Controle simples de orçamentos</li>
-                    </ul>
+            {/* CTA Final */}
+            <section className="site-section" style={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', padding: '4rem 1rem' }}>
+                <div className="container" style={{ textAlign: 'center' }}>
+                    <h2 style={{ color: 'white', fontSize: '2.5rem', marginBottom: '1rem' }}>
+                        Pronto para impressionar seus clientes?
+                    </h2>
+                    <p style={{ fontSize: '1.3rem', marginBottom: '2rem', opacity: 0.95 }}>
+                        Crie seu primeiro orçamento profissional agora mesmo. É grátis!
+                    </p>
+                    <Link 
+                        to="/register" 
+                        className="btn btn-lg"
+                        style={{ 
+                            background: 'white', 
+                            color: '#667eea',
+                            padding: '1rem 3rem',
+                            fontSize: '1.2rem',
+                            fontWeight: 'bold',
+                            border: 'none',
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                        }}
+                    >
+                        Criar meu primeiro orçamento grátis
+                    </Link>
+                    <p style={{ marginTop: '1.5rem', fontSize: '0.95rem', opacity: 0.9 }}>
+                        ✓ Sem cartão de crédito • ✓ Sem compromisso
+                    </p>
                 </div>
             </section>
         </SiteLayout>

@@ -157,11 +157,14 @@ export default function HomePage() {
                         style={{ 
                             background: 'white', 
                             color: '#667eea',
-                            padding: '1rem 3rem',
-                            fontSize: '1.2rem',
+                            padding: '1rem 2rem',
+                            fontSize: '1.1rem',
                             fontWeight: 'bold',
                             border: 'none',
-                            boxShadow: '0 8px 20px rgba(0,0,0,0.2)'
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                            maxWidth: '100%',
+                            display: 'inline-block',
+                            wordWrap: 'break-word'
                         }}
                     >
                         Criar meu primeiro orçamento grátis

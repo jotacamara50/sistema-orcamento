@@ -30,6 +30,12 @@ export default function LoginPage({ defaultRegister = false }) {
         try {
             if (isRegister) {
                 await register(formData);
+                
+                // Dispara evento de conversão no Facebook Pixel
+                if (window.fbq) {
+                    window.fbq('track', 'CompleteRegistration');
+                }
+                
                 // Redirect to create first budget (onboarding!)
                 navigate('/budgets/new');
             } else {

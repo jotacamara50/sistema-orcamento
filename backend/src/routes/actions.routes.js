@@ -76,7 +76,7 @@ router.get('/budgets/:id/pdf', async (req, res) => {
 });
 
 // Generate WhatsApp link for budget
-router.get('/budgets/:id/whatsapp', (req, res) => {
+router.get('/budgets/:id/whatsapp', async (req, res) => {
     try {
         const budget = db.prepare(`
       SELECT b.*, c.nome as client_nome, c.telefone as client_telefone
@@ -86,19 +86,41 @@ router.get('/budgets/:id/whatsapp', (req, res) => {
     `).get(req.params.id, req.user.id);
 
         if (!budget) {
-            return res.status(404).json({ error: 'Orçamento não encontrado' });
+            return res.status(404).json({ error: 'Or??amento n??o encontrado' });
         }
 
         if (!budget.client_telefone) {
-            return res.status(400).json({ error: 'Cliente não possui telefone cadastrado' });
+            return res.status(400).json({ error: 'Cliente n??o possui telefone cadastrado' });
         }
 
-        const user = db.prepare('SELECT whatsapp_template FROM users WHERE id = ?').get(req.user.id);
+        const user = db.prepare('SELECT nome, email, telefone, tipo_servico, brand_color, whatsapp_template FROM users WHERE id = ?').get(req.user.id);
 
-        // Gera URL do PDF
         const filename = `orcamento-${req.user.id}-${req.params.id}.pdf`;
+        const publicPdfsPath = path.join(__dirname, '../../public/pdfs');
+        const filePath = path.join(publicPdfsPath, filename);
+
+        if (!fs.existsSync(publicPdfsPath)) {
+            fs.mkdirSync(publicPdfsPath, { recursive: true });
+        }
+
+        if (!fs.existsSync(filePath)) {
+            const items = db.prepare('SELECT * FROM budget_items WHERE budget_id = ?').all(req.params.id);
+
+            if (!items || items.length === 0) {
+                return res.status(400).json({ error: 'Or??amento sem itens' });
+            }
+
+            const pdfBuffer = await generateBudgetPDF({ ...budget, items }, user);
+
+            if (!pdfBuffer || pdfBuffer.length === 0) {
+                throw new Error('PDF vazio gerado');
+            }
+
+            fs.writeFileSync(filePath, pdfBuffer);
+        }
+
         const host = req.get('host');
-        // Se for localhost/desenvolvimento, usa http, senão usa https
+        // Se for localhost/desenvolvimento, usa http, sen??o usa https
         const protocol = host.includes('localhost') ? 'http' : 'https';
         const pdfUrl = `${protocol}://${host}/pdfs/${filename}`;
 

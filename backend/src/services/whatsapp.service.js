@@ -11,12 +11,8 @@ export function generateBudgetWhatsAppLink(budget, clientPhone, template, pdfUrl
     let message = template
         .replace(/\{\{cliente\}\}/g, budget.client_nome)
         .replace(/\{\{numero\}\}/g, numero)
-        .replace(/\{\{total\}\}/g, total);
-
-    // Adiciona link do PDF na mensagem
-    if (pdfUrl) {
-        message += `\n\n📄 *Ver orçamento em PDF:*\n${pdfUrl}`;
-    }
+        .replace(/\{\{total\}\}/g, total)
+        .replace(/\{\{pdf\}\}/g, pdfUrl || '');
 
     // Clean phone number (remove non-digits)
     const cleanPhone = clientPhone.replace(/\D/g, '');

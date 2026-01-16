@@ -74,7 +74,16 @@ export default function AdminPage() {
       return;
     }
     const cleanPhone = telefone.replace(/\D/g, '');
-    const message = encodeURIComponent(`Olá ${nome}! Bem-vindo(a) ao OrcaZap! 🎉\n\nEstamos muito felizes em tê-lo(a) conosco. Qualquer dúvida, estou à disposição!`);
+    const primeiroNome = nome.split(' ')[0];
+    const message = encodeURIComponent(`Olá, ${primeiroNome}! Tudo bem?
+
+Aqui é a Juliana, do atendimento do OrçaZap.
+
+Vi que você acabou de realizar seu cadastro no sistema. Seja muito bem-vindo!
+
+Passei rapidinho só para saber: você conseguiu gerar seu primeiro orçamento em PDF para testar ou ficou com alguma dúvida?
+
+Se precisar de ajuda, é só me chamar por aqui, combinado?`);
     window.open(`https://wa.me/55${cleanPhone}?text=${message}`, '_blank');
   };
 

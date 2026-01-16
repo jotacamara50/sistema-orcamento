@@ -54,8 +54,9 @@ router.get('/budgets/:id/pdf', async (req, res) => {
         fs.writeFileSync(filePath, pdfBuffer);
         
         // Gera URL público do PDF
-        const protocol = req.protocol;
         const host = req.get('host');
+        // Se for localhost/desenvolvimento, usa http, senão usa https
+        const protocol = host.includes('localhost') ? 'http' : 'https';
         const pdfUrl = `${protocol}://${host}/pdfs/${filename}`;
 
         res.setHeader('Content-Type', 'application/pdf');
@@ -96,8 +97,9 @@ router.get('/budgets/:id/whatsapp', (req, res) => {
 
         // Gera URL do PDF
         const filename = `orcamento-${req.user.id}-${req.params.id}.pdf`;
-        const protocol = req.protocol;
         const host = req.get('host');
+        // Se for localhost/desenvolvimento, usa http, senão usa https
+        const protocol = host.includes('localhost') ? 'http' : 'https';
         const pdfUrl = `${protocol}://${host}/pdfs/${filename}`;
 
         const link = generateBudgetWhatsAppLink(budget, budget.client_telefone, user.whatsapp_template, pdfUrl);

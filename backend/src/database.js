@@ -8,7 +8,7 @@ const __dirname = dirname(__filename);
 const DB_PATH = process.env.DB_PATH || join(__dirname, '..', 'orcamentos.db');
 const db = new Database(DB_PATH);
 const DEFAULT_BRAND_COLOR = '#2563eb';
-export const DEFAULT_WHATSAPP_TEMPLATE = 'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado. \ud83d\udee0\ufe0f\n\n\ud83d\udcc4 Toque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!';
+export const DEFAULT_WHATSAPP_TEMPLATE = 'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado.\n\nToque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!';
 
 // Enable foreign keys
 db.pragma('foreign_keys = ON');
@@ -56,7 +56,8 @@ function initializeDatabase() {
   const legacyTemplates = [
     'Olá {{cliente}}, segue o orçamento {{numero}} no valor de {{total}}. Qualquer dúvida fico à disposição.',
     'Olá {{cliente}}, tudo bem?\n\nSegue o orçamento {{numero}} no valor de {{total}}.\n\nFico à disposição para qualquer dúvida.',
-    'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado.\n\nToque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!'
+    'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado.\n\nToque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!',
+    'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado. \ud83d\udee0\ufe0f\n\n\ud83d\udcc4 Toque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!'
   ];
   const placeholders = legacyTemplates.map(() => '?').join(', ');
   db.prepare(

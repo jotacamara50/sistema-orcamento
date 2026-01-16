@@ -33,7 +33,7 @@ export default function BudgetFormPage() {
         observacoes: '',
         status: 'rascunho',
         logo_data: '',
-        items: [{ descricao: '', quantidade: 1, valor_unitario: 0 }]
+        items: [{ descricao: '', quantidade: '1', valor_unitario: '0' }]
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -65,7 +65,11 @@ export default function BudgetFormPage() {
                 observacoes: res.data.observacoes || '',
                 status: res.data.status,
                 logo_data: res.data.logo_data || '',
-                items: res.data.items
+                items: res.data.items.map((item) => ({
+                    ...item,
+                    quantidade: item.quantidade === null || item.quantidade === undefined ? '' : String(item.quantidade),
+                    valor_unitario: item.valor_unitario === null || item.valor_unitario === undefined ? '' : String(item.valor_unitario)
+                }))
             });
         } catch (error) {
             console.error('Error loading budget:', error);
@@ -77,9 +81,30 @@ export default function BudgetFormPage() {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const parseDecimal = (rawValue) => {
+        if (typeof rawValue === 'number') {
+            return rawValue;
+        }
+        if (rawValue === '' || rawValue === null || rawValue === undefined) {
+            return 0;
+        }
+        let normalized = String(rawValue).trim().replace(/\s/g, '');
+        if (!normalized) {
+            return 0;
+        }
+        if (normalized.includes(',') && normalized.includes('.')) {
+            normalized = normalized.replace(/\./g, '').replace(',', '.');
+        } else {
+            normalized = normalized.replace(',', '.');
+        }
+        normalized = normalized.replace(/[^0-9.-]/g, '');
+        const parsed = Number(normalized);
+        return Number.isFinite(parsed) ? parsed : 0;
+    };
+
     const handleItemChange = (index, field, value) => {
         const newItems = [...formData.items];
-        newItems[index][field] = field === 'descricao' ? value : parseFloat(value) || 0;
+        newItems[index][field] = field === 'descricao' ? value : value.replace(/[^0-9.,]/g, '');
         setFormData({ ...formData, items: newItems });
     };
 
@@ -106,7 +131,7 @@ export default function BudgetFormPage() {
     const addItem = () => {
         setFormData({
             ...formData,
-            items: [...formData.items, { descricao: '', quantidade: 1, valor_unitario: 0 }]
+            items: [...formData.items, { descricao: '', quantidade: '1', valor_unitario: '0' }]
         });
     };
 
@@ -118,7 +143,11 @@ export default function BudgetFormPage() {
     };
 
     const calculateTotal = () => {
-        return formData.items.reduce((sum, item) => sum + (item.quantidade * item.valor_unitario), 0);
+        return formData.items.reduce((sum, item) => {
+            const quantidade = parseDecimal(item.quantidade);
+            const valorUnitario = parseDecimal(item.valor_unitario);
+            return sum + (quantidade * valorUnitario);
+        }, 0);
     };
 
     const handleSubmit = async (e) => {
@@ -127,11 +156,19 @@ export default function BudgetFormPage() {
         setLoading(true);
 
         try {
+            const payload = {
+                ...formData,
+                items: formData.items.map((item) => ({
+                    ...item,
+                    quantidade: parseDecimal(item.quantidade),
+                    valor_unitario: parseDecimal(item.valor_unitario)
+                }))
+            };
             if (isEdit) {
-                await budgetsApi.update(id, formData);
+                await budgetsApi.update(id, payload);
                 navigate('/budgets');
             } else {
-                const res = await budgetsApi.create(formData);
+                const res = await budgetsApi.create(payload);
                 // Update trial count after successful creation
                 if (!isPaidActive) {
                     updateUser({ trial_budget_count: user.trial_budget_count + 1 });
@@ -281,10 +318,9 @@ export default function BudgetFormPage() {
                                 <div className="form-group" style={{ marginBottom: 0 }}>
                                     <label>Quantidade</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
                                         className="input"
-                                        min="0.01"
-                                        step="0.01"
                                         value={item.quantidade}
                                         onChange={(e) => handleItemChange(index, 'quantidade', e.target.value)}
                                         required
@@ -294,10 +330,9 @@ export default function BudgetFormPage() {
                                 <div className="form-group" style={{ marginBottom: 0 }}>
                                     <label>Valor Unit.</label>
                                     <input
-                                        type="number"
+                                        type="text"
+                                        inputMode="decimal"
                                         className="input"
-                                        min="0"
-                                        step="0.01"
                                         placeholder="0,00"
                                         value={item.valor_unitario}
                                         onChange={(e) => handleItemChange(index, 'valor_unitario', e.target.value)}

@@ -15,6 +15,9 @@ export default function BudgetViewPage() {
     const [pdfLoading, setPdfLoading] = useState(false);
 
     useEffect(() => {
+        // Sempre rola para o topo ao abrir a página
+        window.scrollTo(0, 0);
+        
         loadBudget();
         // Verifica se veio da criação de orçamento
         if (location.state?.justCreated) {

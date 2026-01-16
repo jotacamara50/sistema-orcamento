@@ -384,7 +384,7 @@ export default function BudgetListPage() {
                                                 padding: 'var(--space-sm) var(--space-xs)'
                                             }}
                                         >
-                                            {duplicatingId === budget.id ? '...' : '📋 Dup'}
+                                            {duplicatingId === budget.id ? '...' : '📋 Copiar'}
                                         </button>
                                     </div>
                                 </div>

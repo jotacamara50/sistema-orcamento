@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate, Link, useLocation } from 'react-router-dom';
 import { budgets as budgetsApi, actions } from '../api';
 import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
@@ -7,12 +7,24 @@ import StatusBadge from '../components/StatusBadge';
 export default function BudgetViewPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const [budget, setBudget] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+    const [whatsappSent, setWhatsappSent] = useState(false);
+    const [pdfLoading, setPdfLoading] = useState(false);
 
     useEffect(() => {
         loadBudget();
-    }, [id]);
+        // Verifica se veio da criação de orçamento
+        if (location.state?.justCreated) {
+            setShowSuccessMessage(true);
+            // Remove o estado para não mostrar novamente ao atualizar
+            window.history.replaceState({}, document.title);
+            // Esconde a mensagem após 5 segundos
+            setTimeout(() => setShowSuccessMessage(false), 5000);
+        }
+    }, [id, location]);
 
     const loadBudget = async () => {
         try {
@@ -25,32 +37,78 @@ export default function BudgetViewPage() {
         }
     };
 
-    const handleDownloadPDF = async () => {
+    const handleDownloadPDF = async (isRetry = false) => {
+        if (pdfLoading) return; // Evita cliques múltiplos
+        
+        setPdfLoading(true);
         try {
             const res = await actions.downloadPDF(id);
+            
+            // Verifica se recebeu dados válidos
+            if (!res.data || res.data.size === 0) {
+                throw new Error('PDF vazio recebido');
+            }
+            
             const blob = new Blob([res.data], { type: 'application/pdf' });
             const url = window.URL.createObjectURL(blob);
             
-            // Abre em nova aba para permitir impressão ou download
-            const printWindow = window.open(url, '_blank');
-            if (printWindow) {
-                printWindow.onload = () => {
-                    // Limpa a URL após carregar
-                    setTimeout(() => window.URL.revokeObjectURL(url), 100);
-                };
-            } else {
-                // Fallback se popup foi bloqueado: faz download direto
+            // Tenta abrir em nova aba primeiro
+            try {
+                const printWindow = window.open(url, '_blank');
+                
+                if (printWindow && !printWindow.closed) {
+                    // Sucesso ao abrir em nova aba
+                    printWindow.onload = () => {
+                        setTimeout(() => window.URL.revokeObjectURL(url), 100);
+                    };
+                } else {
+                    // Popup bloqueado, tenta download direto
+                    throw new Error('Popup bloqueado');
+                }
+            } catch (popupError) {
+                // Fallback 1: Download direto
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', `orcamento-${String(budget.numero).padStart(4, '0')}.pdf`);
+                link.download = `orcamento-${String(budget.numero).padStart(4, '0')}.pdf`;
+                link.style.display = 'none';
                 document.body.appendChild(link);
-                link.click();
-                link.remove();
-                window.URL.revokeObjectURL(url);
+                
+                try {
+                    link.click();
+                } catch (clickError) {
+                    // Fallback 2: Forçar download via dispatchEvent
+                    const clickEvent = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    link.dispatchEvent(clickEvent);
+                }
+                
+                document.body.removeChild(link);
+                setTimeout(() => window.URL.revokeObjectURL(url), 1000);
             }
+            
+            setPdfLoading(false);
         } catch (error) {
             console.error('Error downloading PDF:', error);
-            alert('Erro ao baixar PDF');
+            setPdfLoading(false);
+            
+            // Se for primeiro erro e não foi retry, tenta novamente
+            if (!isRetry && confirm('Erro ao carregar PDF. Tentar novamente?')) {
+                setTimeout(() => handleDownloadPDF(true), 500);
+            } else {
+                // Mensagem de erro mais detalhada
+                const errorMsg = error.response?.status === 404 
+                    ? 'Orçamento não encontrado'
+                    : error.response?.status === 500
+                    ? 'Erro no servidor ao gerar PDF. Tente novamente em alguns segundos.'
+                    : error.message?.includes('Network')
+                    ? 'Erro de conexão. Verifique sua internet e tente novamente.'
+                    : 'Erro ao carregar PDF. Tente novamente ou entre em contato com o suporte.';
+                    
+                alert(errorMsg);
+            }
         }
     };
 
@@ -58,6 +116,16 @@ export default function BudgetViewPage() {
         try {
             const res = await actions.getWhatsAppLink(id);
             window.open(res.data.whatsapp_link, '_blank');
+            
+            // Atualiza status para "enviado" automaticamente
+            if (budget.status === 'rascunho') {
+                await budgetsApi.update(id, { ...budget, status: 'enviado' });
+                setBudget({ ...budget, status: 'enviado' });
+            }
+            
+            // Mostra confirmação visual
+            setWhatsappSent(true);
+            setTimeout(() => setWhatsappSent(false), 4000);
         } catch (error) {
             console.error('Error generating WhatsApp link:', error);
             alert(error.response?.data?.error || 'Erro ao gerar link do WhatsApp');
@@ -83,6 +151,22 @@ export default function BudgetViewPage() {
                 console.error('Error deleting budget:', error);
                 alert('Erro ao deletar orçamento');
             }
+        }
+    };
+
+    const handleDuplicate = async () => {
+        try {
+            const { client_id, observacoes, items, logo_data } = budget;
+            const created = await budgetsApi.create({
+                client_id,
+                observacoes,
+                items,
+                logo_data
+            });
+            navigate(`/budgets/${created.data.id}/edit`);
+        } catch (error) {
+            console.error('Error duplicating budget:', error);
+            alert(error.response?.data?.error || 'Erro ao duplicar orçamento');
         }
     };
 
@@ -123,6 +207,42 @@ export default function BudgetViewPage() {
             <Navbar />
 
             <div className="container page">
+                {/* Mensagem de sucesso ao criar */}
+                {showSuccessMessage && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        padding: 'clamp(1rem, 3vw, 1.5rem)',
+                        borderRadius: '8px',
+                        marginBottom: 'var(--space-lg)',
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                        lineHeight: '1.5'
+                    }}>
+                        ✅ Orçamento criado com sucesso! Agora você pode ver o PDF ou enviar pelo WhatsApp
+                    </div>
+                )}
+
+                {/* Confirmação de envio WhatsApp */}
+                {whatsappSent && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                        color: 'white',
+                        padding: 'clamp(1rem, 3vw, 1.5rem)',
+                        borderRadius: '8px',
+                        marginBottom: 'var(--space-lg)',
+                        textAlign: 'center',
+                        fontWeight: 'bold',
+                        fontSize: 'clamp(0.95rem, 2.5vw, 1.1rem)',
+                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                        lineHeight: '1.5'
+                    }}>
+                        ✅ Enviado com sucesso para {budget.client_nome}!
+                    </div>
+                )}
+
                 <div style={{
                     display: 'flex',
                     flexDirection: 'column',
@@ -139,19 +259,53 @@ export default function BudgetViewPage() {
                     <Link to="/budgets" className="btn btn-secondary" style={{ alignSelf: 'flex-start', minWidth: '120px' }}>← Voltar</Link>
                 </div>
 
+                {/* Botão WhatsApp destacado */}
+                <div style={{ marginBottom: 'var(--space-lg)' }}>
+                    <button 
+                        onClick={handleWhatsApp} 
+                        style={{
+                            width: '100%',
+                            padding: 'clamp(1rem, 3vw, 1.5rem)',
+                            fontSize: 'clamp(1.1rem, 3vw, 1.3rem)',
+                            fontWeight: 'bold',
+                            background: '#25D366',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(37, 211, 102, 0.3)',
+                            transition: 'all 0.2s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: 'var(--space-md)',
+                            minHeight: '56px'
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.background = '#20BA5A'}
+                        onMouseOut={(e) => e.currentTarget.style.background = '#25D366'}
+                    >
+                        <span style={{ fontSize: 'clamp(1.3rem, 4vw, 1.5rem)' }}>📱</span>
+                        Enviar pelo WhatsApp
+                    </button>
+                </div>
+
                 {/* Actions */}
                 <div className="card mb-lg">
-                    <h3 className="mb-md">Ações</h3>
+                    <h3 className="mb-md">Outras Ações</h3>
                     <div style={{ display: 'grid', gap: 'var(--space-md)', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-                        <button onClick={handleDownloadPDF} className="btn btn-primary">
-                            📄 Ver PDF
-                        </button>
-                        <button onClick={handleWhatsApp} className="btn btn-whatsapp">
-                            📱 Enviar WhatsApp
+                        <button 
+                            onClick={() => handleDownloadPDF(false)} 
+                            className="btn btn-primary"
+                            disabled={pdfLoading}
+                        >
+                            {pdfLoading ? '⏳ Carregando...' : '📄 Ver PDF'}
                         </button>
                         <Link to={`/budgets/${id}/edit`} className="btn btn-secondary">
                             ✏️ Editar
                         </Link>
+                        <button onClick={handleDuplicate} className="btn btn-secondary">
+                            📋 Duplicar
+                        </button>
                         <button onClick={handleDelete} className="btn btn-danger">
                             🗑️ Deletar
                         </button>

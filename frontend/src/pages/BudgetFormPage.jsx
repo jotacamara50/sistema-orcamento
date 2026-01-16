@@ -38,6 +38,8 @@ export default function BudgetFormPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showTrialModal, setShowTrialModal] = useState(false);
+    const [showClientModal, setShowClientModal] = useState(false);
+    const [newClientData, setNewClientData] = useState({ nome: '', telefone: '', email: '' });
 
     useEffect(() => {
         loadClients();
@@ -127,14 +129,16 @@ export default function BudgetFormPage() {
         try {
             if (isEdit) {
                 await budgetsApi.update(id, formData);
+                navigate('/budgets');
             } else {
                 const res = await budgetsApi.create(formData);
                 // Update trial count after successful creation
                 if (!isPaidActive) {
                     updateUser({ trial_budget_count: user.trial_budget_count + 1 });
                 }
+                // Redireciona para a página de visualização com indicador de sucesso
+                navigate(`/budgets/${res.data.id}`, { state: { justCreated: true } });
             }
-            navigate('/budgets');
         } catch (err) {
             if (err.response?.data?.trial_expired) {
                 setShowTrialModal(true);
@@ -153,6 +157,29 @@ export default function BudgetFormPage() {
         }).format(value);
     };
 
+    const handleOpenClientModal = () => {
+        setNewClientData({ nome: '', telefone: '', email: '' });
+        setShowClientModal(true);
+    };
+
+    const handleCloseClientModal = () => {
+        setShowClientModal(false);
+        setNewClientData({ nome: '', telefone: '', email: '' });
+    };
+
+    const handleCreateClient = async (e) => {
+        e.preventDefault();
+        try {
+            const res = await clientsApi.create(newClientData);
+            await loadClients();
+            setFormData({ ...formData, client_id: res.data.id });
+            handleCloseClientModal();
+        } catch (error) {
+            console.error('Error creating client:', error);
+            alert('Erro ao criar cliente');
+        }
+    };
+
     return (
         <div>
             <Navbar />
@@ -167,7 +194,17 @@ export default function BudgetFormPage() {
                         <h3 className="mb-lg">Informações do Cliente</h3>
 
                         <div className="form-group">
-                            <label>Cliente *</label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
+                                <label>Cliente *</label>
+                                <button 
+                                    type="button" 
+                                    onClick={handleOpenClientModal}
+                                    className="btn btn-secondary btn-sm"
+                                    style={{ fontSize: '0.85rem' }}
+                                >
+                                    + Novo Cliente
+                                </button>
+                            </div>
                             <select
                                 name="client_id"
                                 className="select"
@@ -182,12 +219,6 @@ export default function BudgetFormPage() {
                                     </option>
                                 ))}
                             </select>
-                            {clients.length === 0 && (
-                                <p className="text-sm text-secondary mt-sm">
-                                    Nenhum cliente cadastrado.{' '}
-                                    <a href="/clients" style={{ color: 'var(--primary)' }}>Criar cliente</a>
-                                </p>
-                            )}
                         </div>
 
                         <div className="form-group" style={{ marginTop: 'var(--space-lg)' }}>
@@ -339,6 +370,60 @@ export default function BudgetFormPage() {
             </div>
 
             {showTrialModal && <TrialBlockModal onClose={() => setShowTrialModal(false)} />}
+            
+            {showClientModal && (
+                <div className="modal-overlay" onClick={handleCloseClientModal}>
+                    <div className="modal" onClick={(e) => e.stopPropagation()}>
+                        <h2 className="mb-lg">Novo Cliente</h2>
+
+                        <form onSubmit={handleCreateClient}>
+                            <div className="form-group">
+                                <label>Nome *</label>
+                                <input
+                                    type="text"
+                                    className="input"
+                                    placeholder="Nome do cliente"
+                                    value={newClientData.nome}
+                                    onChange={(e) => setNewClientData({ ...newClientData, nome: e.target.value })}
+                                    required
+                                    autoFocus
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Telefone</label>
+                                <input
+                                    type="tel"
+                                    className="input"
+                                    placeholder="(11) 99999-9999"
+                                    value={newClientData.telefone}
+                                    onChange={(e) => setNewClientData({ ...newClientData, telefone: e.target.value })}
+                                />
+                            </div>
+
+                            <div className="form-group">
+                                <label>Email</label>
+                                <input
+                                    type="email"
+                                    className="input"
+                                    placeholder="cliente@email.com"
+                                    value={newClientData.email}
+                                    onChange={(e) => setNewClientData({ ...newClientData, email: e.target.value })}
+                                />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: 'var(--space-md)', marginTop: 'var(--space-lg)' }}>
+                                <button type="button" onClick={handleCloseClientModal} className="btn btn-secondary" style={{ flex: 1 }}>
+                                    Cancelar
+                                </button>
+                                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                                    Criar Cliente
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

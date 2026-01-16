@@ -23,18 +23,35 @@ router.get('/budgets/:id/pdf', async (req, res) => {
         }
 
         const items = db.prepare('SELECT * FROM budget_items WHERE budget_id = ?').all(req.params.id);
+        
+        // Garante que sempre há itens
+        if (!items || items.length === 0) {
+            return res.status(400).json({ error: 'Orçamento sem itens' });
+        }
+        
         budget.items = items;
 
         const user = db.prepare('SELECT nome, email, telefone, tipo_servico, brand_color FROM users WHERE id = ?').get(req.user.id);
 
         const pdfBuffer = await generateBudgetPDF(budget, user);
+        
+        // Verifica se o PDF foi gerado corretamente
+        if (!pdfBuffer || pdfBuffer.length === 0) {
+            throw new Error('PDF vazio gerado');
+        }
 
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=orcamento-${String(budget.numero).padStart(4, '0')}.pdf`);
+        res.setHeader('Content-Length', pdfBuffer.length);
+        res.setHeader('Cache-Control', 'no-cache');
         res.send(pdfBuffer);
     } catch (error) {
         console.error('PDF generation error:', error);
-        res.status(500).json({ error: 'Erro ao gerar PDF' });
+        console.error('Error stack:', error.stack);
+        res.status(500).json({ 
+            error: 'Erro ao gerar PDF',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 

@@ -88,6 +88,18 @@ export default function BudgetListPage() {
         }
     };
 
+    const handleQuickWhatsApp = async (e, budgetId) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            const res = await actions.getWhatsAppLink(budgetId);
+            window.open(res.data.whatsapp_link, '_blank');
+        } catch (error) {
+            console.error('Error generating WhatsApp link:', error);
+            alert(error.response?.data?.error || 'Erro ao gerar link do WhatsApp');
+        }
+    };
+
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('pt-BR', {
             style: 'currency',
@@ -287,62 +299,96 @@ export default function BudgetListPage() {
                 ) : (
                     <div style={{ display: 'grid', gap: 'var(--space-md)' }}>
                         {budgetList.map((budget) => (
-                            <Link
-                                key={budget.id}
-                                to={`/budgets/${budget.id}`}
-                                style={{ textDecoration: 'none', color: 'inherit' }}
-                            >
-                                <div className="card budget-card" style={{ transition: 'transform 0.2s' }}>
-                                    <div style={{
-                                        display: 'flex',
-                                        flexDirection: 'column',
-                                        gap: 'var(--space-md)'
-                                    }}>
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                gap: 'var(--space-md)',
-                                                marginBottom: 'var(--space-sm)',
-                                                flexWrap: 'wrap'
-                                            }}>
-                                                <h3>Orçamento #{String(budget.numero).padStart(4, '0')}</h3>
-                                                <StatusBadge status={budget.status} />
-                                            </div>
-                                            <p className="text-secondary text-sm">
-                                                Cliente: {budget.client_nome}
-                                            </p>
-                                            <p className="text-secondary text-xs mt-sm">
-                                                {formatDate(budget.data)}
-                                            </p>
-                                        </div>
+                            <div key={budget.id} className="card budget-card" style={{ transition: 'transform 0.2s' }}>
+                                <div style={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: 'var(--space-md)'
+                                }}>
+                                    <div style={{ flex: 1 }}>
                                         <div style={{
                                             display: 'flex',
-                                            justifyContent: 'space-between',
                                             alignItems: 'center',
                                             gap: 'var(--space-md)',
-                                            paddingTop: 'var(--space-sm)',
-                                            borderTop: '1px solid var(--border)'
+                                            marginBottom: 'var(--space-sm)',
+                                            flexWrap: 'wrap'
                                         }}>
-                                            <div style={{ fontSize: 'clamp(1.25rem, 5vw, 1.5rem)', fontWeight: '700', color: 'var(--primary)' }}>
-                                                {formatCurrency(budget.total)}
-                                            </div>
-                                            <button
-                                                type="button"
-                                                onClick={(event) => {
-                                                    event.preventDefault();
-                                                    event.stopPropagation();
-                                                    handleDuplicate(budget.id);
-                                                }}
-                                                className="btn btn-secondary btn-sm"
-                                                disabled={duplicatingId === budget.id}
-                                            >
-                                                {duplicatingId === budget.id ? 'Duplicando...' : 'Duplicar'}
-                                            </button>
+                                            <h3>Orçamento #{String(budget.numero).padStart(4, '0')}</h3>
+                                            <StatusBadge status={budget.status} />
+                                        </div>
+                                        <p className="text-secondary text-sm">
+                                            Cliente: {budget.client_nome}
+                                        </p>
+                                        <p className="text-secondary text-xs mt-sm">
+                                            {formatDate(budget.data)}
+                                        </p>
+                                    </div>
+                                    <div style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        gap: 'var(--space-md)',
+                                        paddingTop: 'var(--space-sm)',
+                                        borderTop: '1px solid var(--border)'
+                                    }}>
+                                        <div style={{ fontSize: 'clamp(1.25rem, 5vw, 1.5rem)', fontWeight: '700', color: 'var(--primary)' }}>
+                                            {formatCurrency(budget.total)}
                                         </div>
                                     </div>
+                                    
+                                    {/* Ações rápidas */}
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))',
+                                        gap: 'var(--space-sm)',
+                                        paddingTop: 'var(--space-sm)',
+                                        borderTop: '1px solid var(--border)'
+                                    }}>
+                                        <Link
+                                            to={`/budgets/${budget.id}`}
+                                            className="btn btn-primary btn-sm"
+                                            style={{ 
+                                                textDecoration: 'none', 
+                                                textAlign: 'center',
+                                                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                                padding: 'var(--space-sm) var(--space-xs)'
+                                            }}
+                                        >
+                                            👁️ Ver
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleQuickWhatsApp(e, budget.id)}
+                                            className="btn btn-sm"
+                                            style={{ 
+                                                background: '#25D366', 
+                                                color: 'white',
+                                                border: 'none',
+                                                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                                padding: 'var(--space-sm) var(--space-xs)'
+                                            }}
+                                        >
+                                            📱 Zap
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={(event) => {
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                handleDuplicate(budget.id);
+                                            }}
+                                            className="btn btn-secondary btn-sm"
+                                            disabled={duplicatingId === budget.id}
+                                            style={{
+                                                fontSize: 'clamp(0.75rem, 2vw, 0.875rem)',
+                                                padding: 'var(--space-sm) var(--space-xs)'
+                                            }}
+                                        >
+                                            {duplicatingId === budget.id ? '...' : '📋 Dup'}
+                                        </button>
+                                    </div>
                                 </div>
-                            </Link>
+                            </div>
                         ))}
                     </div>
                 )}

@@ -40,7 +40,12 @@ export const budgets = {
 
 export const actions = {
     downloadPDF: (id) => {
-        return api.get(`/actions/budgets/${id}/pdf`, { responseType: 'blob' });
+        return api.get(`/actions/budgets/${id}/pdf`, { 
+            responseType: 'blob',
+            timeout: 30000, // 30 segundos de timeout
+            maxContentLength: Infinity,
+            maxBodyLength: Infinity
+        });
     },
     getWhatsAppLink: (id) => api.get(`/actions/budgets/${id}/whatsapp`),
     getActivationLink: () => api.get('/actions/activation/whatsapp')

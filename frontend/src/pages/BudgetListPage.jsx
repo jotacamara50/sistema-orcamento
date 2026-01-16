@@ -289,10 +289,46 @@ export default function BudgetListPage() {
                         Carregando...
                     </div>
                 ) : budgetList.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>Nenhum orçamento criado ainda</h3>
-                        <p>Crie seu primeiro orçamento profissional em 2 minutos!</p>
-                        <button onClick={handleNewBudget} className="btn btn-primary mt-lg">
+                    <div className="empty-state" style={{ 
+                        textAlign: 'center', 
+                        padding: 'clamp(2rem, 5vw, 4rem)',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        borderRadius: '12px',
+                        color: 'white',
+                        boxShadow: '0 8px 20px rgba(102, 126, 234, 0.2)'
+                    }}>
+                        <div style={{ fontSize: 'clamp(3rem, 8vw, 5rem)', marginBottom: 'var(--space-lg)' }}>🚀</div>
+                        <h2 style={{ color: 'white', fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: 'var(--space-md)' }}>
+                            Bem-vindo! Vamos criar seu primeiro orçamento?
+                        </h2>
+                        <p style={{ fontSize: 'clamp(1rem, 2.5vw, 1.2rem)', marginBottom: 'var(--space-xl)', opacity: 0.95, maxWidth: '600px', margin: '0 auto var(--space-xl)' }}>
+                            É super rápido! Basta preencher os dados do cliente e do serviço. 
+                            Em menos de 1 minuto você terá um PDF profissional pronto para enviar.
+                        </p>
+                        <button 
+                            onClick={handleNewBudget} 
+                            style={{ 
+                                background: 'white',
+                                color: '#667eea',
+                                padding: 'clamp(0.875rem, 2vw, 1.25rem) clamp(1.5rem, 4vw, 2.5rem)',
+                                fontSize: 'clamp(1rem, 2.5vw, 1.2rem)',
+                                fontWeight: 'bold',
+                                border: 'none',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                                transition: 'all 0.2s',
+                                minHeight: '56px'
+                            }}
+                            onMouseOver={(e) => {
+                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0,0,0,0.2)';
+                            }}
+                            onMouseOut={(e) => {
+                                e.currentTarget.style.transform = 'translateY(0)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                            }}
+                        >
                             Criar Primeiro Orçamento
                         </button>
                     </div>

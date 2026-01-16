@@ -1,8 +1,14 @@
 import express from 'express';
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import db from '../database.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { generateBudgetPDF } from '../services/pdf.service.js';
 import { generateBudgetWhatsAppLink, generateActivationWhatsAppLink } from '../services/whatsapp.service.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const router = express.Router();
 
@@ -40,10 +46,23 @@ router.get('/budgets/:id/pdf', async (req, res) => {
             throw new Error('PDF vazio gerado');
         }
 
+        // Salva PDF em pasta pública
+        const filename = `orcamento-${req.user.id}-${req.params.id}.pdf`;
+        const publicPdfsPath = path.join(__dirname, '../../public/pdfs');
+        const filePath = path.join(publicPdfsPath, filename);
+        
+        fs.writeFileSync(filePath, pdfBuffer);
+        
+        // Gera URL público do PDF
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const pdfUrl = `${protocol}://${host}/pdfs/${filename}`;
+
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=orcamento-${String(budget.numero).padStart(4, '0')}.pdf`);
         res.setHeader('Content-Length', pdfBuffer.length);
         res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('X-PDF-URL', pdfUrl);
         res.send(pdfBuffer);
     } catch (error) {
         console.error('PDF generation error:', error);
@@ -75,7 +94,13 @@ router.get('/budgets/:id/whatsapp', (req, res) => {
 
         const user = db.prepare('SELECT whatsapp_template FROM users WHERE id = ?').get(req.user.id);
 
-        const link = generateBudgetWhatsAppLink(budget, budget.client_telefone, user.whatsapp_template);
+        // Gera URL do PDF
+        const filename = `orcamento-${req.user.id}-${req.params.id}.pdf`;
+        const protocol = req.protocol;
+        const host = req.get('host');
+        const pdfUrl = `${protocol}://${host}/pdfs/${filename}`;
+
+        const link = generateBudgetWhatsAppLink(budget, budget.client_telefone, user.whatsapp_template, pdfUrl);
 
         res.json({ whatsapp_link: link });
     } catch (error) {

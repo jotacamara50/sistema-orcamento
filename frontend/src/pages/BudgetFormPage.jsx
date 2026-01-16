@@ -194,17 +194,7 @@ export default function BudgetFormPage() {
                         <h3 className="mb-lg">Informações do Cliente</h3>
 
                         <div className="form-group">
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'var(--space-sm)' }}>
-                                <label>Cliente *</label>
-                                <button 
-                                    type="button" 
-                                    onClick={handleOpenClientModal}
-                                    className="btn btn-secondary btn-sm"
-                                    style={{ fontSize: '0.85rem' }}
-                                >
-                                    + Novo Cliente
-                                </button>
-                            </div>
+                            <label>Cliente *</label>
                             <select
                                 name="client_id"
                                 className="select"
@@ -219,6 +209,19 @@ export default function BudgetFormPage() {
                                     </option>
                                 ))}
                             </select>
+                            <button 
+                                type="button" 
+                                onClick={handleOpenClientModal}
+                                className="btn btn-primary"
+                                style={{ 
+                                    marginTop: 'var(--space-sm)',
+                                    width: '100%',
+                                    fontSize: '0.95rem',
+                                    padding: 'var(--space-sm) var(--space-md)'
+                                }}
+                            >
+                                + Adicionar Novo Cliente
+                            </button>
                         </div>
 
                         <div className="form-group" style={{ marginTop: 'var(--space-lg)' }}>

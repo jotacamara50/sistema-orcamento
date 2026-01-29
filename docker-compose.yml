@@ -43,6 +43,9 @@ services:
       JWT_SECRET: "orcazap-0c7c13d0a7f24f4ea0b7c4c0a3a8c7e2"
       DB_PATH: "/app/data/orcamentos.db"
       MP_ACCESS_TOKEN: "${MP_ACCESS_TOKEN}"
+      EVOLUTION_URL: "${EVOLUTION_URL}"
+      EVOLUTION_INSTANCE: "${EVOLUTION_INSTANCE}"
+      EVOLUTION_APIKEY: "${EVOLUTION_APIKEY}"
       FRONTEND_URL: "https://orcazap.net"
     volumes:
       - ./data/app:/app/data

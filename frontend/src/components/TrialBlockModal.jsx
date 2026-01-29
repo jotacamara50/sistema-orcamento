@@ -59,20 +59,24 @@ export default function TrialBlockModal({ onClose }) {
 
     return (
         <div className="modal-overlay" onClick={onClose}>
-            <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal" onClick={(e) => e.stopPropagation()} style={{ 
+                maxHeight: '90vh', 
+                overflowY: 'auto',
+                position: 'relative'
+            }}>
                 <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-sm)' }}>🎯</div>
-                    <h2 style={{ marginBottom: 'var(--space-sm)', fontSize: '1.8rem' }}>
+                    <h2 style={{ marginBottom: 'var(--space-sm)', fontSize: '1.6rem' }}>
                         Seus 3 orçamentos gratuitos acabaram!
                     </h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)', fontSize: '1.05rem' }}>
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)', fontSize: '1rem' }}>
                         Continue gerando orçamentos profissionais e fechando mais serviços.
                     </p>
 
                     <div style={{
                         background: 'linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15))',
                         border: '2px solid #667eea',
-                        padding: 'var(--space-lg)',
+                        padding: 'var(--space-md)',
                         borderRadius: 'var(--radius-lg)',
                         marginBottom: 'var(--space-md)',
                         position: 'relative'
@@ -90,42 +94,45 @@ export default function TrialBlockModal({ onClose }) {
                         }}>
                             ECONOMIZE 36%
                         </div>
-                        <div style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 'var(--space-sm)' }}>
-                            Plano Anual - Melhor Custo Benefício
+                        <div style={{ fontSize: '1.2rem', fontWeight: 700, marginBottom: 'var(--space-xs)' }}>
+                            Plano Anual
                         </div>
-                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#667eea', marginBottom: 'var(--space-xs)' }}>
+                        <div style={{ fontSize: '1.8rem', fontWeight: 700, color: '#667eea', marginBottom: 'var(--space-xs)' }}>
                             12x de R$ 24,75
                         </div>
-                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>
                             ou R$ 297,00 à vista
                         </div>
-                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
-                            De <s>R$ 468,00</s> (12 mensalidades) por <strong>R$ 297,00/ano</strong>
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                            De <s>R$ 468,00</s> por <strong>R$ 297,00/ano</strong>
                             <br />
-                            <strong style={{ color: '#22c55e' }}>Você economiza R$ 171,00</strong> comparado ao mensal
+                            <strong style={{ color: '#22c55e' }}>Economize R$ 171,00</strong>
                         </div>
                     </div>
 
                     <div style={{
                         background: '#f8f9fa',
-                        padding: 'var(--space-md)',
+                        padding: 'var(--space-sm)',
                         borderRadius: 'var(--radius-md)',
-                        marginBottom: 'var(--space-lg)',
-                        textAlign: 'left',
-                        fontSize: '0.9rem'
+                        marginBottom: 'var(--space-md)',
+                        fontSize: '0.85rem'
                     }}>
-                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>✓</span> Orçamentos ilimitados
-                        </div>
-                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>✓</span> PDFs profissionais com sua logo
-                        </div>
-                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>✓</span> Envio direto para WhatsApp
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>✓</span> Acesso liberado imediatamente
-                        </div>
+                        <div style={{ marginBottom: '4px' }}>✓ Orçamentos ilimitados</div>
+                        <div style={{ marginBottom: '4px' }}>✓ PDFs com sua logo</div>
+                        <div style={{ marginBottom: '4px' }}>✓ Envio direto pro WhatsApp</div>
+                        <div>✓ Acesso imediato</div>
+                    </div>
+
+                    <div style={{
+                        background: 'linear-gradient(180deg, transparent, rgba(102,126,234,0.1))',
+                        textAlign: 'center',
+                        padding: 'var(--space-xs)',
+                        marginBottom: 'var(--space-sm)',
+                        fontSize: '0.85rem',
+                        color: '#667eea',
+                        fontWeight: 600
+                    }}>
+                        ⬇️ Preencha os dados abaixo para assinar
                     </div>
 
                     {PUBLIC_KEY ? (

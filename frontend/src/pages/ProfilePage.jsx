@@ -18,7 +18,8 @@ export default function ProfilePage() {
         nome: '',
         telefone: '',
         tipo_servico: '',
-        brand_color: ''
+        brand_color: '',
+        termos_pagamento_padrao: ''
     });
     const [error, setError] = useState('');
     const [saved, setSaved] = useState(false);
@@ -30,7 +31,8 @@ export default function ProfilePage() {
                 nome: user.nome || '',
                 telefone: user.telefone || '',
                 tipo_servico: user.tipo_servico || '',
-                brand_color: user.brand_color || ''
+                brand_color: user.brand_color || '',
+                termos_pagamento_padrao: user.termos_pagamento_padrao || ''
             });
         }
     }, [user]);
@@ -142,6 +144,17 @@ export default function ProfilePage() {
                             <div className="text-secondary text-xs" style={{ marginTop: 'var(--space-xs)' }}>
                                 Opcional. Use o formato #RRGGBB.
                             </div>
+                        </div>
+
+                        <div className="form-group">
+                            <label>Termos de Pagamento Padrão</label>
+                            <textarea
+                                className="textarea"
+                                rows={4}
+                                placeholder="Ex: 50% de entrada, restante na conclusão."
+                                value={formData.termos_pagamento_padrao}
+                                onChange={(e) => setFormData({ ...formData, termos_pagamento_padrao: e.target.value })}
+                            />
                         </div>
 
                         <div className="form-group">

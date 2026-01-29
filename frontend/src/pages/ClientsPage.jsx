@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { clients as clientsApi } from '../api';
 import Navbar from '../components/Navbar';
+import InputMask from 'react-input-mask';
 
 export default function ClientsPage() {
     const [clients, setClients] = useState([]);
@@ -158,7 +159,7 @@ export default function ClientsPage() {
                                 <input
                                     type="text"
                                     className="input"
-                                    placeholder="Nome do cliente"
+                                    placeholder="Nome da Empresa ou Pessoa"
                                     value={formData.nome}
                                     onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
                                     required
@@ -167,13 +168,22 @@ export default function ClientsPage() {
 
                             <div className="form-group">
                                 <label>Telefone</label>
-                                <input
-                                    type="tel"
-                                    className="input"
-                                    placeholder="(11) 99999-9999"
+                                <InputMask
+                                    mask="(99) 99999-9999"
+                                    maskChar={null}
                                     value={formData.telefone}
                                     onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                                />
+                                >
+                                    {(inputProps) => (
+                                        <input
+                                            {...inputProps}
+                                            type="tel"
+                                            inputMode="tel"
+                                            className="input"
+                                            placeholder="(11) 99999-9999"
+                                        />
+                                    )}
+                                </InputMask>
                             </div>
 
                             <div className="form-group">

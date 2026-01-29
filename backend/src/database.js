@@ -8,6 +8,7 @@ const __dirname = dirname(__filename);
 const DB_PATH = process.env.DB_PATH || join(__dirname, '..', 'orcamentos.db');
 const db = new Database(DB_PATH);
 const DEFAULT_BRAND_COLOR = '#2563eb';
+const DEFAULT_TERMS = '50% de entrada, restante na conclusão.';
 export const DEFAULT_WHATSAPP_TEMPLATE = 'Olá {{cliente}}, tudo bem?\n\nConforme conversamos, preparei seu orçamento detalhado.\n\nToque no link abaixo para ver o PDF:\n{{pdf}}\n\nFico no aguardo do seu de acordo para começarmos!';
 
 // Enable foreign keys
@@ -26,6 +27,7 @@ function initializeDatabase() {
       tipo_servico TEXT,
       brand_color TEXT DEFAULT '${DEFAULT_BRAND_COLOR}',
       whatsapp_template TEXT DEFAULT '${DEFAULT_WHATSAPP_TEMPLATE}',
+      termos_pagamento_padrao TEXT DEFAULT '${DEFAULT_TERMS}',
       is_paid INTEGER DEFAULT 0,
       paid_until TEXT,
       trial_budget_count INTEGER DEFAULT 0,
@@ -42,6 +44,10 @@ function initializeDatabase() {
 
   if (!userColumns.includes('whatsapp_template')) {
     db.exec(`ALTER TABLE users ADD COLUMN whatsapp_template TEXT DEFAULT '${DEFAULT_WHATSAPP_TEMPLATE}'`);
+  }
+
+  if (!userColumns.includes('termos_pagamento_padrao')) {
+    db.exec(`ALTER TABLE users ADD COLUMN termos_pagamento_padrao TEXT DEFAULT '${DEFAULT_TERMS}'`);
   }
 
   if (!userColumns.includes('paid_until')) {
@@ -89,6 +95,7 @@ function initializeDatabase() {
       total REAL DEFAULT 0,
       logo_data TEXT,
       observacoes TEXT,
+      validade INTEGER DEFAULT 15,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
       FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE CASCADE,
@@ -101,6 +108,10 @@ function initializeDatabase() {
     db.exec('ALTER TABLE budgets ADD COLUMN logo_data TEXT');
   }
 
+  if (!budgetColumns.includes('validade')) {
+    db.exec('ALTER TABLE budgets ADD COLUMN validade INTEGER DEFAULT 15');
+  }
+
   // Budget items table
   db.exec(`
     CREATE TABLE IF NOT EXISTS budget_items (
@@ -108,11 +119,17 @@ function initializeDatabase() {
       budget_id INTEGER NOT NULL,
       descricao TEXT NOT NULL,
       quantidade REAL NOT NULL,
+      unidade TEXT DEFAULT 'un',
       valor_unitario REAL NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (budget_id) REFERENCES budgets(id) ON DELETE CASCADE
     )
   `);
+
+  const budgetItemColumns = db.prepare('PRAGMA table_info(budget_items)').all().map((column) => column.name);
+  if (!budgetItemColumns.includes('unidade')) {
+    db.exec("ALTER TABLE budget_items ADD COLUMN unidade TEXT DEFAULT 'un'");
+  }
 
   console.log('✅ Database initialized successfully');
 }

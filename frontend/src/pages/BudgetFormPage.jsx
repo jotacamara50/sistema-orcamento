@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { budgets as budgetsApi, clients as clientsApi } from '../api';
 import { useAuth } from '../contexts/AuthContext';
 import Navbar from '../components/Navbar';
 import TrialBlockModal from '../components/TrialBlockModal';
+import InputMask from 'react-input-mask';
 
 export default function BudgetFormPage() {
     const { id } = useParams();
@@ -27,19 +28,33 @@ export default function BudgetFormPage() {
         return endOfDay.getTime() >= Date.now();
     })();
 
+    const formatCurrencyInput = (rawValue) => {
+        const digits = String(rawValue ?? '').replace(/\D/g, '');
+        if (!digits) {
+            return '';
+        }
+        const numberValue = Number(digits) / 100;
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL'
+        }).format(numberValue);
+    };
+
     const [clients, setClients] = useState([]);
     const [formData, setFormData] = useState({
         client_id: '',
         observacoes: '',
         status: 'rascunho',
         logo_data: '',
-        items: [{ descricao: '', quantidade: '1', valor_unitario: '0' }]
+        validade: '15',
+        items: [{ descricao: '', unidade: 'un', quantidade: '1', valor_unitario: formatCurrencyInput('0') }]
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [showTrialModal, setShowTrialModal] = useState(false);
     const [showClientModal, setShowClientModal] = useState(false);
     const [newClientData, setNewClientData] = useState({ nome: '', telefone: '', email: '' });
+    const observacoesInitialized = useRef(false);
 
     useEffect(() => {
         loadClients();
@@ -47,6 +62,25 @@ export default function BudgetFormPage() {
             loadBudget();
         }
     }, [id]);
+
+    useEffect(() => {
+        if (!isEdit) {
+            observacoesInitialized.current = false;
+        }
+    }, [isEdit]);
+
+    useEffect(() => {
+        if (observacoesInitialized.current || isEdit || !user) {
+            return;
+        }
+        const defaultTerms = typeof user.termos_pagamento_padrao === 'string'
+            ? user.termos_pagamento_padrao.trim()
+            : '';
+        if (!formData.observacoes?.trim() && defaultTerms) {
+            setFormData((prev) => ({ ...prev, observacoes: defaultTerms }));
+        }
+        observacoesInitialized.current = true;
+    }, [isEdit, user, formData.observacoes]);
 
     const loadClients = async () => {
         try {
@@ -65,10 +99,14 @@ export default function BudgetFormPage() {
                 observacoes: res.data.observacoes || '',
                 status: res.data.status,
                 logo_data: res.data.logo_data || '',
+                validade: res.data.validade ? String(res.data.validade) : '15',
                 items: res.data.items.map((item) => ({
                     ...item,
+                    unidade: item.unidade || 'un',
                     quantidade: item.quantidade === null || item.quantidade === undefined ? '' : String(item.quantidade),
-                    valor_unitario: item.valor_unitario === null || item.valor_unitario === undefined ? '' : String(item.valor_unitario)
+                    valor_unitario: item.valor_unitario === null || item.valor_unitario === undefined
+                        ? ''
+                        : formatCurrencyInput(item.valor_unitario)
                 }))
             });
         } catch (error) {
@@ -102,9 +140,20 @@ export default function BudgetFormPage() {
         return Number.isFinite(parsed) ? parsed : 0;
     };
 
+    const parseInteger = (rawValue, fallback = 15) => {
+        const parsed = parseInt(String(rawValue ?? '').trim(), 10);
+        return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+    };
+
     const handleItemChange = (index, field, value) => {
         const newItems = [...formData.items];
-        newItems[index][field] = field === 'descricao' ? value : value.replace(/[^0-9.,]/g, '');
+        if (field === 'descricao' || field === 'unidade') {
+            newItems[index][field] = value;
+        } else if (field === 'valor_unitario') {
+            newItems[index][field] = formatCurrencyInput(value);
+        } else {
+            newItems[index][field] = value.replace(/[^0-9.,]/g, '');
+        }
         setFormData({ ...formData, items: newItems });
     };
 
@@ -131,7 +180,7 @@ export default function BudgetFormPage() {
     const addItem = () => {
         setFormData({
             ...formData,
-            items: [...formData.items, { descricao: '', quantidade: '1', valor_unitario: '0' }]
+            items: [...formData.items, { descricao: '', unidade: 'un', quantidade: '1', valor_unitario: formatCurrencyInput('0') }]
         });
     };
 
@@ -158,8 +207,10 @@ export default function BudgetFormPage() {
         try {
             const payload = {
                 ...formData,
+                validade: parseInteger(formData.validade),
                 items: formData.items.map((item) => ({
                     ...item,
+                    unidade: item.unidade || 'un',
                     quantidade: parseDecimal(item.quantidade),
                     valor_unitario: parseDecimal(item.valor_unitario)
                 }))
@@ -298,7 +349,7 @@ export default function BudgetFormPage() {
                         {formData.items.map((item, index) => (
                             <div key={index} style={{
                                 display: 'grid',
-                                gridTemplateColumns: '2fr 1fr 1fr auto',
+                                gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
                                 gap: 'var(--space-md)',
                                 marginBottom: 'var(--space-md)',
                                 alignItems: 'end'
@@ -308,11 +359,28 @@ export default function BudgetFormPage() {
                                     <input
                                         type="text"
                                         className="input"
-                                        placeholder="Ex: Instalação de tomada"
+                                        placeholder="Ex: Instalação de Ar Condicionado 12.000 BTUs"
                                         value={item.descricao}
                                         onChange={(e) => handleItemChange(index, 'descricao', e.target.value)}
                                         required
                                     />
+                                </div>
+
+                                <div className="form-group" style={{ marginBottom: 0 }}>
+                                    <label>Unidade</label>
+                                    <select
+                                        className="select"
+                                        value={item.unidade}
+                                        onChange={(e) => handleItemChange(index, 'unidade', e.target.value)}
+                                    >
+                                        <option value="un">UN (Unidade)</option>
+                                        <option value="m²">M² (Metro Quadrado)</option>
+                                        <option value="m">M (Metro Linear)</option>
+                                        <option value="dia">DIA (Diária)</option>
+                                        <option value="hr">HR (Hora)</option>
+                                        <option value="cj">CJ (Conjunto)</option>
+                                        <option value="vb">VB (Verba)</option>
+                                    </select>
                                 </div>
 
                                 <div className="form-group" style={{ marginBottom: 0 }}>
@@ -366,10 +434,24 @@ export default function BudgetFormPage() {
 
                     <div className="card mb-lg">
                         <h3 className="mb-lg">Observações</h3>
+                        <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
+                            <label>Validade da Proposta (dias)</label>
+                            <input
+                                type="number"
+                                name="validade"
+                                min="1"
+                                className="input"
+                                value={formData.validade}
+                                onChange={handleChange}
+                            />
+                            <div className="text-secondary text-xs" style={{ marginTop: 'var(--space-xs)' }}>
+                                Padrão: 15 dias.
+                            </div>
+                        </div>
                         <textarea
                             name="observacoes"
                             className="textarea"
-                            placeholder="Observações adicionais (opcional)"
+                            placeholder="Ex: Pagamento 50% na entrada e 50% na conclusão."
                             value={formData.observacoes}
                             onChange={handleChange}
                         />
@@ -420,7 +502,7 @@ export default function BudgetFormPage() {
                                 <input
                                     type="text"
                                     className="input"
-                                    placeholder="Nome do cliente"
+                                    placeholder="Nome da Empresa ou Pessoa"
                                     value={newClientData.nome}
                                     onChange={(e) => setNewClientData({ ...newClientData, nome: e.target.value })}
                                     required
@@ -430,13 +512,22 @@ export default function BudgetFormPage() {
 
                             <div className="form-group">
                                 <label>Telefone</label>
-                                <input
-                                    type="tel"
-                                    className="input"
-                                    placeholder="(11) 99999-9999"
+                                <InputMask
+                                    mask="(99) 99999-9999"
+                                    maskChar={null}
                                     value={newClientData.telefone}
                                     onChange={(e) => setNewClientData({ ...newClientData, telefone: e.target.value })}
-                                />
+                                >
+                                    {(inputProps) => (
+                                        <input
+                                            {...inputProps}
+                                            type="tel"
+                                            inputMode="tel"
+                                            className="input"
+                                            placeholder="(11) 99999-9999"
+                                        />
+                                    )}
+                                </InputMask>
                             </div>
 
                             <div className="form-group">

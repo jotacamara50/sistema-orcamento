@@ -73,14 +73,14 @@ router.get('/:id', (req, res) => {
 // Create budget with trial validation
 router.post('/', (req, res) => {
     try {
-        const { client_id, items, observacoes, logo_data } = req.body;
+        const { client_id, items, observacoes, logo_data, validade } = req.body;
 
         if (!client_id || !items || items.length === 0) {
             return res.status(400).json({ error: 'Cliente e itens são obrigatórios' });
         }
 
         // Check trial limit
-        const user = db.prepare('SELECT is_paid, paid_until, trial_budget_count FROM users WHERE id = ?').get(req.user.id);
+        const user = db.prepare('SELECT is_paid, paid_until, trial_budget_count, termos_pagamento_padrao FROM users WHERE id = ?').get(req.user.id);
         const paidActive = isPaidActive(user);
 
         if (!paidActive && user.trial_budget_count >= 3) {
@@ -107,21 +107,30 @@ router.post('/', (req, res) => {
 
         // Insert budget
         const normalizedLogo = typeof logo_data === 'string' && logo_data.trim() ? logo_data.trim() : null;
+        const parsedValidade = parseInt(validade, 10);
+        const normalizedValidade = Number.isFinite(parsedValidade) && parsedValidade > 0 ? parsedValidade : 15;
+        const normalizedObservacoes = typeof observacoes === 'string' ? observacoes.trim() : '';
+        const defaultTerms = typeof user?.termos_pagamento_padrao === 'string' && user.termos_pagamento_padrao.trim()
+            ? user.termos_pagamento_padrao.trim()
+            : null;
+        const resolvedObservacoes = normalizedObservacoes ? normalizedObservacoes : defaultTerms;
+
         const budgetResult = db.prepare(`
-      INSERT INTO budgets (user_id, client_id, numero, total, logo_data, observacoes)
-      VALUES (?, ?, ?, ?, ?, ?)
-    `).run(req.user.id, client_id, numero, total, normalizedLogo, observacoes || null);
+      INSERT INTO budgets (user_id, client_id, numero, total, logo_data, observacoes, validade)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).run(req.user.id, client_id, numero, total, normalizedLogo, resolvedObservacoes, normalizedValidade);
 
         const budgetId = budgetResult.lastInsertRowid;
 
         // Insert items
         const insertItem = db.prepare(`
-      INSERT INTO budget_items (budget_id, descricao, quantidade, valor_unitario)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO budget_items (budget_id, descricao, quantidade, unidade, valor_unitario)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
         for (const item of items) {
-            insertItem.run(budgetId, item.descricao, item.quantidade, item.valor_unitario);
+            const unidade = typeof item.unidade === 'string' && item.unidade.trim() ? item.unidade.trim() : 'un';
+            insertItem.run(budgetId, item.descricao, item.quantidade, unidade, item.valor_unitario);
         }
 
         // Increment trial count if not paid
@@ -149,11 +158,11 @@ router.post('/', (req, res) => {
 // Update budget
 router.put('/:id', (req, res) => {
     try {
-        const { client_id, items, observacoes, status, logo_data } = req.body;
+        const { client_id, items, observacoes, status, logo_data, validade } = req.body;
         const budgetId = req.params.id;
 
         // Verify ownership
-        const budget = db.prepare('SELECT user_id, logo_data FROM budgets WHERE id = ?').get(budgetId);
+        const budget = db.prepare('SELECT user_id, logo_data, validade FROM budgets WHERE id = ?').get(budgetId);
         if (!budget || budget.user_id !== req.user.id) {
             return res.status(404).json({ error: 'Orçamento não encontrado' });
         }
@@ -166,23 +175,29 @@ router.put('/:id', (req, res) => {
             ? budget.logo_data
             : (typeof logo_data === 'string' && logo_data.trim() ? logo_data.trim() : null);
 
+        const parsedValidade = parseInt(validade, 10);
+        const updatedValidade = validade === undefined
+            ? budget.validade
+            : (Number.isFinite(parsedValidade) && parsedValidade > 0 ? parsedValidade : 15);
+
         db.prepare(`
       UPDATE budgets
-      SET client_id = ?, total = ?, observacoes = ?, status = ?, logo_data = ?
+      SET client_id = ?, total = ?, observacoes = ?, status = ?, logo_data = ?, validade = ?
       WHERE id = ?
-    `).run(client_id, total, observacoes || null, status || 'rascunho', updatedLogo, budgetId);
+    `).run(client_id, total, observacoes || null, status || 'rascunho', updatedLogo, updatedValidade, budgetId);
 
         // Delete old items
         db.prepare('DELETE FROM budget_items WHERE budget_id = ?').run(budgetId);
 
         // Insert new items
         const insertItem = db.prepare(`
-      INSERT INTO budget_items (budget_id, descricao, quantidade, valor_unitario)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO budget_items (budget_id, descricao, quantidade, unidade, valor_unitario)
+      VALUES (?, ?, ?, ?, ?)
     `);
 
         for (const item of items) {
-            insertItem.run(budgetId, item.descricao, item.quantidade, item.valor_unitario);
+            const unidade = typeof item.unidade === 'string' && item.unidade.trim() ? item.unidade.trim() : 'un';
+            insertItem.run(budgetId, item.descricao, item.quantidade, unidade, item.valor_unitario);
         }
 
         // Get updated budget

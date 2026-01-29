@@ -54,7 +54,7 @@ router.post('/register', async (req, res) => {
 
         const token = generateToken({ id: result.lastInsertRowid, email });
         const createdUser = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count, is_admin
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, termos_pagamento_padrao, paid_until, is_paid, trial_budget_count, is_admin
       FROM users WHERE id = ?
     `).get(result.lastInsertRowid);
         const is_paid_active = isPaidActive(createdUser);
@@ -106,6 +106,7 @@ router.post('/login', async (req, res) => {
                 telefone: user.telefone,
                 tipo_servico: user.tipo_servico,
                 brand_color: user.brand_color,
+                termos_pagamento_padrao: user.termos_pagamento_padrao,
                 paid_until: user.paid_until,
                 is_paid: user.is_paid,
                 is_paid_active,
@@ -123,7 +124,7 @@ router.post('/login', async (req, res) => {
 router.get('/me', authenticateToken, (req, res) => {
     try {
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count, is_admin
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, termos_pagamento_padrao, paid_until, is_paid, trial_budget_count, is_admin
       FROM users WHERE id = ?
     `).get(req.user.id);
 
@@ -144,14 +145,14 @@ router.get('/me', authenticateToken, (req, res) => {
 // Update current user profile
 router.put('/me', authenticateToken, (req, res) => {
     try {
-        const { nome, telefone, tipo_servico, brand_color } = req.body;
+        const { nome, telefone, tipo_servico, brand_color, termos_pagamento_padrao } = req.body;
 
-        if (nome === undefined && telefone === undefined && tipo_servico === undefined && brand_color === undefined) {
+        if (nome === undefined && telefone === undefined && tipo_servico === undefined && brand_color === undefined && termos_pagamento_padrao === undefined) {
             return res.status(400).json({ error: 'Nenhum dado para atualizar' });
         }
 
         const user = db.prepare(`
-      SELECT id, email, nome, telefone, tipo_servico, brand_color, paid_until, is_paid, trial_budget_count
+      SELECT id, email, nome, telefone, tipo_servico, brand_color, termos_pagamento_padrao, paid_until, is_paid, trial_budget_count
       FROM users WHERE id = ?
     `).get(req.user.id);
 
@@ -178,9 +179,11 @@ router.put('/me', authenticateToken, (req, res) => {
         const normalizedTelefone = normalizeOptional(telefone);
         const normalizedTipoServico = normalizeOptional(tipo_servico);
         const normalizedBrandColor = normalizeOptional(brand_color);
+        const normalizedTermos = normalizeOptional(termos_pagamento_padrao);
 
         const updatedTelefone = normalizedTelefone === undefined ? user.telefone : normalizedTelefone;
         const updatedTipoServico = normalizedTipoServico === undefined ? user.tipo_servico : normalizedTipoServico;
+        const updatedTermos = normalizedTermos === undefined ? user.termos_pagamento_padrao : normalizedTermos;
 
         let updatedBrandColor = user.brand_color;
         if (normalizedBrandColor !== undefined) {
@@ -195,16 +198,17 @@ router.put('/me', authenticateToken, (req, res) => {
 
         db.prepare(`
       UPDATE users
-      SET nome = ?, telefone = ?, tipo_servico = ?, brand_color = ?
+      SET nome = ?, telefone = ?, tipo_servico = ?, brand_color = ?, termos_pagamento_padrao = ?
       WHERE id = ?
-    `).run(updatedNome, updatedTelefone, updatedTipoServico, updatedBrandColor, req.user.id);
+    `).run(updatedNome, updatedTelefone, updatedTipoServico, updatedBrandColor, updatedTermos, req.user.id);
 
         const updatedUser = {
             ...user,
             nome: updatedNome,
             telefone: updatedTelefone,
             tipo_servico: updatedTipoServico,
-            brand_color: updatedBrandColor
+            brand_color: updatedBrandColor,
+            termos_pagamento_padrao: updatedTermos
         };
 
         res.json({

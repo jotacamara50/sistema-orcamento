@@ -14,7 +14,14 @@ export function generateBudgetPDF(budget, user) {
 
             const accentColor = getAccentColor(user && user.brand_color);
             const date = new Date(budget.data);
-            const formattedDate = date.toLocaleDateString('pt-BR');
+            const baseDate = Number.isNaN(date.getTime()) ? new Date() : date;
+            const formattedDate = baseDate.toLocaleDateString('pt-BR');
+            const validadeDias = Number.isFinite(parseInt(budget.validade, 10)) && parseInt(budget.validade, 10) > 0
+                ? parseInt(budget.validade, 10)
+                : 15;
+            const validUntilDate = new Date(baseDate);
+            validUntilDate.setDate(validUntilDate.getDate() + validadeDias);
+            const formattedValidUntil = validUntilDate.toLocaleDateString('pt-BR');
             const logoBuffer = getLogoBuffer(budget.logo_data);
 
             const pageMargin = doc.page.margins.left;
@@ -36,10 +43,13 @@ export function generateBudgetPDF(budget, user) {
 
             doc.fillColor(baseTextColor).fontSize(20).font('Helvetica-Bold').text('OR\u00c7AMENTO', leftX, cursorY);
             const titleHeight = doc.currentLineHeight();
-            doc.fontSize(9).font('Helvetica').fillColor(mutedTextColor)
-                .text(`Data: ${formattedDate}`, leftX, cursorY + titleHeight + 4);
+            doc.fontSize(9).font('Helvetica').fillColor(mutedTextColor);
+            const metaY = cursorY + titleHeight + 4;
+            const metaLineHeight = doc.currentLineHeight();
+            doc.text(`Data: ${formattedDate}`, leftX, metaY);
+            doc.text(`V\u00e1lido at\u00e9: ${formattedValidUntil}`, leftX, metaY + metaLineHeight + 2);
 
-            cursorY += titleHeight + 18;
+            cursorY = metaY + metaLineHeight * 2 + 10;
             doc.strokeColor(accentColor).lineWidth(1).moveTo(leftX, cursorY).lineTo(leftX + contentWidth, cursorY).stroke();
             cursorY += 12;
 
@@ -122,8 +132,8 @@ export function generateBudgetPDF(budget, user) {
             doc.fontSize(10).font('Helvetica-Bold').fillColor(accentColor).text('Itens', leftX, cursorY);
             cursorY = doc.y + 8;
 
-            const descWidth = Math.round(contentWidth * 0.52);
-            const qtyWidth = 55;
+            const descWidth = Math.round(contentWidth * 0.48);
+            const qtyWidth = 80;
             const unitWidth = 90;
             const totalWidth = contentWidth - descWidth - qtyWidth - unitWidth;
             const descX = leftX;
@@ -158,8 +168,15 @@ export function generateBudgetPDF(budget, user) {
                     drawTableHeader();
                 }
 
+                const unidadeRaw = typeof item.unidade === 'string' && item.unidade.trim() ? item.unidade.trim() : 'un';
+                const normalizedUnit = unidadeRaw.toLowerCase();
+                const unidadeLabel = normalizedUnit === 'm\u00b2' || normalizedUnit === 'm2'
+                    ? 'm\u00b2'
+                    : unidadeRaw.toUpperCase();
+                const quantityLabel = `${item.quantidade} ${unidadeLabel}`;
+
                 doc.fontSize(9).fillColor(baseTextColor).text(description, descX + 6, cursorY, { width: descWidth - 8 });
-                doc.text(String(item.quantidade), qtyX, cursorY, { width: qtyWidth, align: 'center' });
+                doc.text(quantityLabel, qtyX, cursorY, { width: qtyWidth, align: 'center' });
                 doc.text(formatCurrency(item.valor_unitario), unitX, cursorY, { width: unitWidth, align: 'right' });
                 doc.text(formatCurrency(itemTotal), totalX, cursorY, { width: totalWidth, align: 'right' });
 
@@ -183,9 +200,12 @@ export function generateBudgetPDF(budget, user) {
                 const obsTitle = (hasMultipleLines || trimmedObs.length > 80)
                     ? 'Observa\u00e7\u00f5es'
                     : 'Observa\u00e7\u00e3o';
-                const obsTitleHeight = doc.heightOfString(obsTitle, { width: contentWidth });
-                const obsTextHeight = doc.heightOfString(obsText, { width: contentWidth });
-                const obsBlockHeight = obsTitleHeight + obsTextHeight + 10;
+                const boxPadding = 10;
+                const boxGap = 6;
+                const innerWidth = contentWidth - boxPadding * 2;
+                const obsTitleHeight = doc.heightOfString(obsTitle, { width: innerWidth });
+                const obsTextHeight = doc.heightOfString(obsText, { width: innerWidth });
+                const obsBlockHeight = obsTitleHeight + obsTextHeight + boxPadding * 2 + boxGap;
                 const footerReserve = 60;
                 const maxY = pageHeight - pageMargin - footerReserve;
 
@@ -194,11 +214,15 @@ export function generateBudgetPDF(budget, user) {
                     cursorY = pageMargin;
                 }
 
+                doc.fillColor('#eef2ff').roundedRect(leftX, cursorY, contentWidth, obsBlockHeight, 6).fill();
+                doc.strokeColor(accentColor).lineWidth(1).roundedRect(leftX, cursorY, contentWidth, obsBlockHeight, 6).stroke();
+
+                const textStartY = cursorY + boxPadding;
                 doc.fontSize(9).font('Helvetica-Bold').fillColor(accentColor)
-                    .text(obsTitle, leftX, cursorY);
+                    .text(obsTitle, leftX + boxPadding, textStartY, { width: innerWidth });
                 doc.fillColor(baseTextColor).fontSize(10).font('Helvetica')
-                    .text(obsText, leftX, cursorY + obsTitleHeight + 6, { width: contentWidth });
-                cursorY = doc.y + 12;
+                    .text(obsText, leftX + boxPadding, textStartY + obsTitleHeight + boxGap, { width: innerWidth });
+                cursorY += obsBlockHeight + 12;
             }
 
             const contactText = formattedUserPhone

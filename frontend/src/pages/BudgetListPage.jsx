@@ -5,6 +5,8 @@ import { budgets, actions } from '../api';
 import Navbar from '../components/Navbar';
 import StatusBadge from '../components/StatusBadge';
 import TrialBlockModal from '../components/TrialBlockModal';
+import FirstTimeTooltip from '../components/FirstTimeTooltip';
+import Toast from '../components/Toast';
 
 export default function BudgetListPage() {
     const { user, updateUser } = useAuth();
@@ -30,6 +32,7 @@ export default function BudgetListPage() {
     const [showTrialModal, setShowTrialModal] = useState(false);
     const [duplicatingId, setDuplicatingId] = useState(null);
     const [renewLoading, setRenewLoading] = useState(false);
+    const [toast, setToast] = useState(null);
 
     useEffect(() => {
         loadBudgets();
@@ -75,6 +78,7 @@ export default function BudgetListPage() {
                 updateUser({ trial_budget_count: user.trial_budget_count + 1 });
             }
 
+            setToast({ message: 'Orçamento duplicado com sucesso!', type: 'success' });
             navigate(`/budgets/${created.data.id}/edit`);
         } catch (error) {
             if (error.response?.data?.trial_expired) {
@@ -94,6 +98,7 @@ export default function BudgetListPage() {
         try {
             const res = await actions.getWhatsAppLink(budgetId);
             window.open(res.data.whatsapp_link, '_blank');
+            setToast({ message: 'WhatsApp aberto! Envie a mensagem pro cliente.', type: 'success' });
         } catch (error) {
             console.error('Error generating WhatsApp link:', error);
             alert(error.response?.data?.error || 'Erro ao gerar link do WhatsApp');
@@ -275,11 +280,23 @@ export default function BudgetListPage() {
                         gap: 'var(--space-md)',
                         flexWrap: 'wrap'
                     }}>
-                        <Link to="/clients" className="btn btn-secondary" style={{ flex: '1 1 auto', minWidth: '140px' }}>
-                            Gerenciar Clientes
+                        <Link to="/clients" className="btn btn-secondary" style={{ flex: '0 1 auto', minWidth: '140px' }}>
+                            👥 Gerenciar Clientes
                         </Link>
-                        <button onClick={handleNewBudget} className="btn btn-primary" style={{ flex: '1 1 auto', minWidth: '140px' }}>
-                            + Novo Orçamento
+                        <button 
+                            onClick={handleNewBudget} 
+                            className="btn btn-primary" 
+                            style={{ 
+                                flex: '1 1 auto', 
+                                minWidth: '200px',
+                                fontSize: '1.1rem',
+                                fontWeight: 700,
+                                padding: 'var(--space-md) var(--space-lg)',
+                                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
+                            }}
+                        >
+                            ✨ Criar Novo Orçamento
                         </button>
                     </div>
                 </div>

@@ -372,7 +372,7 @@ export default function BudgetFormPage() {
                                 alignItems: 'end'
                             }}>
                                 <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>Descrição</label>
+                                    <label>🔧 Serviço / Material</label>
                                     <input
                                         type="text"
                                         className="input"
@@ -400,7 +400,7 @@ export default function BudgetFormPage() {
                                 </div>
 
                                 <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>{getQuantityLabel(item.unidade)}</label>
+                                    <label>📊 {getQuantityLabel(item.unidade)}</label>
                                     <input
                                         type="text"
                                         inputMode="decimal"
@@ -412,7 +412,7 @@ export default function BudgetFormPage() {
                                 </div>
 
                                 <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>Valor Unit.</label>
+                                    <label>💵 Valor Unit.</label>
                                     <input
                                         type="text"
                                         inputMode="decimal"
@@ -449,7 +449,7 @@ export default function BudgetFormPage() {
                     </div>
 
                     <div className="card mb-lg">
-                        <h3 className="mb-lg">Observações</h3>
+                        <h3 className="mb-lg">💰 Condições de Pagamento</h3>
                         <div className="form-group" style={{ marginBottom: 'var(--space-md)' }}>
                             <label>Validade da Proposta (dias)</label>
                             <input
@@ -464,10 +464,14 @@ export default function BudgetFormPage() {
                                 Padrão: 15 dias.
                             </div>
                         </div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)', lineHeight: '1.5' }}>
+                            💡 Como o cliente vai pagar? Parcelado? À vista? Tem desconto? Quando começa o serviço?
+                        </div>
                         <textarea
                             name="observacoes"
                             className="textarea"
-                            placeholder="Ex: Pagamento 50% na entrada e 50% na conclusão."
+                            rows="4"
+                            placeholder="Exemplo:\nPagamento: 50% na hora e 50% depois do serviço pronto.\nPrazo: Termino em 15 dias."
                             value={formData.observacoes}
                             onChange={handleChange}
                         />

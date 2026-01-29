@@ -38,7 +38,9 @@ export default function TrialBlockModal({ onClose }) {
                         Seu per?odo gratuito acabou!
                     </h2>
                     <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)' }}>
-                        De <strong>R$ 468,00</strong> (valor mensal) por apenas <strong>R$ 297,00</strong> ? vista no plano Anual.
+                        De <strong>R$ 468,00</strong> (total de 12 mensalidades) por apenas <strong>R$ 297,00</strong> ? vista no plano Anual.
+                        <br />
+                        <strong>Economize R$ 171,00</strong> em rela??o ao plano mensal.
                         <br />
                         Isso d? <strong>menos de R$ 25,00 por m?s</strong>.
                     </p>

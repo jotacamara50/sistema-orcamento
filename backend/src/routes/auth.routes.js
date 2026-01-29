@@ -2,6 +2,7 @@ import express from 'express';
 import bcrypt from 'bcrypt';
 import db, { DEFAULT_WHATSAPP_TEMPLATE } from '../database.js';
 import { generateToken, authenticateToken } from '../middleware/auth.js';
+import { sendWelcomeMessage } from '../services/evolution.service.js';
 
 const router = express.Router();
 
@@ -51,6 +52,10 @@ router.post('/register', async (req, res) => {
       INSERT INTO users (email, password_hash, nome, telefone, tipo_servico, whatsapp_template)
       VALUES (?, ?, ?, ?, ?, ?)
     `).run(email, password_hash, nome, telefone || null, tipo_servico || null, DEFAULT_WHATSAPP_TEMPLATE);
+
+        void sendWelcomeMessage(nome, telefone).catch((error) => {
+            console.error('Welcome message error:', error);
+        });
 
         const token = generateToken({ id: result.lastInsertRowid, email });
         const createdUser = db.prepare(`

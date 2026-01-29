@@ -203,6 +203,10 @@ export default function TrialBlockModal({ onClose }) {
                             textDecoration: 'underline',
                             cursor: 'pointer'
                         }}
+                    >
+                        Falar com suporte
+                    </button>
+                </div>
             </div>
         </div>
     );

@@ -31,9 +31,14 @@ export async function sendWelcomeMessage(name, phone) {
         return;
     }
 
-    const url = buildEvolutionUrl('/message/sendText');
-    if (!url || !EVOLUTION_APIKEY) {
-        return;
+    if (!EVOLUTION_URL || !EVOLUTION_APIKEY || !EVOLUTION_INSTANCE) {
+        throw new Error('Evolution API not configured (EVOLUTION_URL/EVOLUTION_APIKEY/EVOLUTION_INSTANCE)');
+    }
+
+    const instancePath = `/message/sendText/${encodeURIComponent(EVOLUTION_INSTANCE)}`;
+    const url = buildEvolutionUrl(instancePath);
+    if (!url) {
+        throw new Error('Evolution API URL is invalid');
     }
 
     const safeName = String(name ?? '').trim() || 'cliente';
@@ -47,8 +52,7 @@ Bons negócios!`;
 
     const payload = {
         number,
-        text: message,
-        ...(EVOLUTION_INSTANCE ? { instanceName: EVOLUTION_INSTANCE } : {})
+        text: message
     };
 
     await axios.post(url, payload, {

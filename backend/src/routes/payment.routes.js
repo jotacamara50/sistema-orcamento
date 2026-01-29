@@ -1,7 +1,7 @@
 import express from 'express';
 import db from '../database.js';
 import { authenticateToken } from '../middleware/auth.js';
-import { createAnnualPreference, getPaymentDetails } from '../services/payment.service.js';
+import { createAnnualPreference, createTransparentPayment, getPaymentDetails } from '../services/payment.service.js';
 
 const router = express.Router();
 
@@ -19,6 +19,21 @@ router.post('/checkout', authenticateToken, async (req, res) => {
     } catch (error) {
         console.error('Checkout error:', error);
         res.status(500).json({ error: 'Erro ao criar pagamento' });
+    }
+});
+
+router.post('/transparent', authenticateToken, async (req, res) => {
+    try {
+        const user = db.prepare('SELECT id, email FROM users WHERE id = ?').get(req.user.id);
+        if (!user) {
+            return res.status(404).json({ error: 'Usuário não encontrado' });
+        }
+
+        const payment = await createTransparentPayment(user, req.body);
+        res.json(payment);
+    } catch (error) {
+        console.error('Transparent checkout error:', error);
+        res.status(500).json({ error: 'Erro ao processar pagamento' });
     }
 });
 

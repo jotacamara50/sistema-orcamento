@@ -170,10 +170,19 @@ export function generateBudgetPDF(budget, user) {
 
                 const unidadeRaw = typeof item.unidade === 'string' && item.unidade.trim() ? item.unidade.trim() : 'un';
                 const normalizedUnit = unidadeRaw.toLowerCase();
-                const unidadeLabel = normalizedUnit === 'm\u00b2' || normalizedUnit === 'm2'
-                    ? 'm\u00b2'
-                    : unidadeRaw.toUpperCase();
-                const quantityLabel = `${item.quantidade} ${unidadeLabel}`;
+                const unidadeLabelMap = {
+                    'm\u00b2': 'm\u00b2',
+                    m2: 'm\u00b2',
+                    m: 'm',
+                    dia: 'dias',
+                    hr: 'horas',
+                    un: 'un',
+                    sv: 'Servi\u00e7o'
+                };
+                const unidadeLabel = unidadeLabelMap[normalizedUnit] || unidadeRaw;
+                const quantityLabel = normalizedUnit === 'sv'
+                    ? unidadeLabel
+                    : `${item.quantidade} ${unidadeLabel}`;
 
                 doc.fontSize(9).fillColor(baseTextColor).text(description, descX + 6, cursorY, { width: descWidth - 8 });
                 doc.text(quantityLabel, qtyX, cursorY, { width: qtyWidth, align: 'center' });

@@ -145,6 +145,23 @@ export default function BudgetFormPage() {
         return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
     };
 
+    const getQuantityLabel = (unidade) => {
+        const normalized = String(unidade || '').toLowerCase();
+        if (normalized === 'm²' || normalized === 'm2') {
+            return 'Área (m²)';
+        }
+        if (normalized === 'm') {
+            return 'Medida (m)';
+        }
+        if (normalized === 'dia') {
+            return 'Dias';
+        }
+        if (normalized === 'hr') {
+            return 'Horas';
+        }
+        return 'Qtd';
+    };
+
     const handleItemChange = (index, field, value) => {
         const newItems = [...formData.items];
         if (field === 'descricao' || field === 'unidade') {
@@ -373,18 +390,17 @@ export default function BudgetFormPage() {
                                         value={item.unidade}
                                         onChange={(e) => handleItemChange(index, 'unidade', e.target.value)}
                                     >
-                                        <option value="un">UN (Unidade)</option>
-                                        <option value="m²">M² (Metro Quadrado)</option>
-                                        <option value="m">M (Metro Linear)</option>
-                                        <option value="dia">DIA (Diária)</option>
-                                        <option value="hr">HR (Hora)</option>
-                                        <option value="cj">CJ (Conjunto)</option>
-                                        <option value="vb">VB (Verba)</option>
+                                        <option value="un">Unidade</option>
+                                        <option value="m²">Metro Quadrado (m²)</option>
+                                        <option value="m">Metro Linear (m)</option>
+                                        <option value="dia">Diária</option>
+                                        <option value="hr">Hora</option>
+                                        <option value="sv">Serviço Fechado</option>
                                     </select>
                                 </div>
 
                                 <div className="form-group" style={{ marginBottom: 0 }}>
-                                    <label>Quantidade</label>
+                                    <label>{getQuantityLabel(item.unidade)}</label>
                                     <input
                                         type="text"
                                         inputMode="decimal"

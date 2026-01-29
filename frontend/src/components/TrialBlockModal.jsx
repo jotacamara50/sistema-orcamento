@@ -11,7 +11,6 @@ export default function TrialBlockModal({ onClose }) {
     const [paymentResult, setPaymentResult] = useState(null);
     const checkoutRef = useRef(null);
     const { user } = useAuth();
-    const [cpf, setCpf] = useState('');
 
     useEffect(() => {
         if (PUBLIC_KEY) {
@@ -51,23 +50,10 @@ export default function TrialBlockModal({ onClose }) {
     const handleSubmit = async (formData) => {
         try {
             setLoading(true);
-            const cpfDigits = String(cpf).replace(/\D/g, '').slice(0, 11);
             const payerFromBrick = formData?.payer || {};
-            const identificationFromBrick = payerFromBrick?.identification?.number;
-
-            if (!identificationFromBrick && !cpfDigits) {
-                alert('Informe seu CPF para continuar.');
-                throw new Error('CPF_REQUIRED');
-            }
-
             const payer = {
                 ...payerFromBrick,
-                email: payerFromBrick.email || user?.email || undefined,
-                identification: identificationFromBrick
-                    ? payerFromBrick.identification
-                    : cpfDigits
-                        ? { type: 'CPF', number: cpfDigits }
-                        : undefined
+                email: payerFromBrick.email || user?.email || undefined
             };
             const payload = {
                 payment_method_id: formData?.paymentMethodId,
@@ -80,9 +66,6 @@ export default function TrialBlockModal({ onClose }) {
             setPaymentResult(res.data);
             return res.data;
         } catch (error) {
-            if (error?.message === 'CPF_REQUIRED') {
-                throw error;
-            }
             console.error('Error processing payment:', error);
             alert('Erro ao processar pagamento. Verifique os dados e tente novamente.');
             throw error;
@@ -178,24 +161,6 @@ export default function TrialBlockModal({ onClose }) {
                         fontWeight: 600
                     }}>
                         ⬇️ Preencha os dados abaixo para assinar
-                    </div>
-
-                    <div className="form-group" style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
-                        <label>CPF *</label>
-                        <input
-                            type="text"
-                            className="input"
-                            placeholder="000.000.000-00"
-                            value={cpf}
-                            onChange={(event) => {
-                                const digits = event.target.value.replace(/\D/g, '').slice(0, 11);
-                                const formatted = digits
-                                    .replace(/^(\d{3})(\d)/, '$1.$2')
-                                    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
-                                    .replace(/\.(\d{3})(\d)/, '.$1-$2');
-                                setCpf(formatted);
-                            }}
-                        />
                     </div>
 
                     {PUBLIC_KEY ? (

@@ -33,39 +33,85 @@ export default function TrialBlockModal({ onClose }) {
         <div className="modal-overlay" onClick={onClose}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-sm)' }}>??</div>
+                    <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-sm)' }}>🎯</div>
                     <h2 style={{ marginBottom: 'var(--space-sm)' }}>
-                        Seu per?odo gratuito acabou!
+                        Seus 3 orçamentos gratuitos acabaram!
                     </h2>
-                    <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-lg)' }}>
-                        De <strong>R$ 468,00</strong> (total de 12 mensalidades) por apenas <strong>R$ 297,00</strong> ? vista no plano Anual.
-                        <br />
-                        <strong>Economize R$ 171,00</strong> em rela??o ao plano mensal.
-                        <br />
-                        Isso d? <strong>menos de R$ 25,00 por m?s</strong>.
+                    <p style={{ color: 'var(--text-secondary)', marginBottom: 'var(--space-md)', fontSize: '1.1rem' }}>
+                        Continue gerando orçamentos profissionais e fechando mais serviços.
                     </p>
 
                     <div style={{
-                        background: 'linear-gradient(135deg, rgba(34,197,94,0.12), rgba(34,197,94,0.05))',
-                        border: '1px solid rgba(34,197,94,0.3)',
+                        background: 'linear-gradient(135deg, rgba(102,126,234,0.15), rgba(118,75,162,0.15))',
+                        border: '2px solid #667eea',
                         padding: 'var(--space-lg)',
                         borderRadius: 'var(--radius-lg)',
-                        marginBottom: 'var(--space-lg)',
-                        textAlign: 'left'
+                        marginBottom: 'var(--space-md)',
+                        position: 'relative'
                     }}>
-                        <div style={{ marginBottom: 'var(--space-sm)', fontWeight: 600 }}>? Acesso liberado automaticamente</div>
-                        <div style={{ marginBottom: 'var(--space-sm)' }}>? Or?amentos ilimitados e PDFs profissionais</div>
-                        <div>? Envio r?pido por WhatsApp</div>
+                        <div style={{
+                            position: 'absolute',
+                            top: '-12px',
+                            right: '20px',
+                            background: '#22c55e',
+                            color: 'white',
+                            padding: '4px 12px',
+                            borderRadius: '12px',
+                            fontSize: '0.75rem',
+                            fontWeight: 'bold'
+                        }}>
+                            ECONOMIZE 36%
+                        </div>
+                        <div style={{ fontSize: '1.4rem', fontWeight: 700, marginBottom: 'var(--space-sm)' }}>
+                            Plano Anual - Melhor Custo Benefício
+                        </div>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: '#667eea', marginBottom: 'var(--space-xs)' }}>
+                            12x de R$ 24,75
+                        </div>
+                        <div style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-md)' }}>
+                            ou R$ 297,00 à vista
+                        </div>
+                        <div style={{ fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                            De <s>R$ 468,00</s> por <strong>R$ 297,00/ano</strong>
+                            <br />
+                            <strong style={{ color: '#22c55e' }}>Você economiza R$ 171,00</strong> em relação ao mensal
+                        </div>
+                    </div>
+
+                    <div style={{
+                        background: '#f8f9fa',
+                        padding: 'var(--space-md)',
+                        borderRadius: 'var(--radius-md)',
+                        marginBottom: 'var(--space-lg)',
+                        textAlign: 'left',
+                        fontSize: '0.9rem'
+                    }}>
+                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>✓</span> Orçamentos ilimitados
+                        </div>
+                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>✓</span> PDFs profissionais com sua logo
+                        </div>
+                        <div style={{ marginBottom: 'var(--space-xs)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>✓</span> Envio direto para WhatsApp
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span>✓</span> Acesso liberado automaticamente
+                        </div>
                     </div>
 
                     <button
                         onClick={handleCheckout}
                         className="btn btn-whatsapp btn-lg"
-                        style={{ width: '100%', fontWeight: 700 }}
+                        style={{ width: '100%', fontWeight: 700, fontSize: '1.1rem' }}
                         disabled={loading}
                     >
-                        {loading ? 'Redirecionando...' : 'Liberar Acesso Agora'}
+                        {loading ? 'Redirecionando...' : 'Assinar Agora e Liberar Acesso'}
                     </button>
+
+                    <div style={{ marginTop: 'var(--space-md)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                        Pagamento seguro via Mercado Pago
+                    </div>
 
                     <div style={{ marginTop: 'var(--space-md)' }}>
                         <button

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from 'react';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import api, { actions } from '../api';
+import { useAuth } from '../contexts/AuthContext';
 
 const ANNUAL_PRICE = 297.0;
 const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY;
@@ -9,6 +10,8 @@ export default function TrialBlockModal({ onClose }) {
     const [loading, setLoading] = useState(false);
     const [paymentResult, setPaymentResult] = useState(null);
     const checkoutRef = useRef(null);
+    const { user } = useAuth();
+    const [cpf, setCpf] = useState('');
 
     useEffect(() => {
         if (PUBLIC_KEY) {
@@ -30,7 +33,13 @@ export default function TrialBlockModal({ onClose }) {
         return () => clearTimeout(timer);
     }, []);
 
-    const initialization = useMemo(() => ({ amount: ANNUAL_PRICE }), []);
+    const initialization = useMemo(() => {
+        const base = { amount: ANNUAL_PRICE };
+        if (user?.email) {
+            base.payer = { email: user.email };
+        }
+        return base;
+    }, [user?.email]);
     const customization = useMemo(() => ({
         paymentMethods: {
             creditCard: 'all',
@@ -42,17 +51,38 @@ export default function TrialBlockModal({ onClose }) {
     const handleSubmit = async (formData) => {
         try {
             setLoading(true);
+            const cpfDigits = String(cpf).replace(/\D/g, '').slice(0, 11);
+            const payerFromBrick = formData?.payer || {};
+            const identificationFromBrick = payerFromBrick?.identification?.number;
+
+            if (!identificationFromBrick && !cpfDigits) {
+                alert('Informe seu CPF para continuar.');
+                throw new Error('CPF_REQUIRED');
+            }
+
+            const payer = {
+                ...payerFromBrick,
+                email: payerFromBrick.email || user?.email || undefined,
+                identification: identificationFromBrick
+                    ? payerFromBrick.identification
+                    : cpfDigits
+                        ? { type: 'CPF', number: cpfDigits }
+                        : undefined
+            };
             const payload = {
                 payment_method_id: formData?.paymentMethodId,
                 token: formData?.token,
                 issuer_id: formData?.issuerId,
                 installments: formData?.installments,
-                payer: formData?.payer
+                payer
             };
             const res = await api.post('/payment/transparent', payload);
             setPaymentResult(res.data);
             return res.data;
         } catch (error) {
+            if (error?.message === 'CPF_REQUIRED') {
+                throw error;
+            }
             console.error('Error processing payment:', error);
             alert('Erro ao processar pagamento. Verifique os dados e tente novamente.');
             throw error;
@@ -150,9 +180,28 @@ export default function TrialBlockModal({ onClose }) {
                         ⬇️ Preencha os dados abaixo para assinar
                     </div>
 
+                    <div className="form-group" style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
+                        <label>CPF *</label>
+                        <input
+                            type="text"
+                            className="input"
+                            placeholder="000.000.000-00"
+                            value={cpf}
+                            onChange={(event) => {
+                                const digits = event.target.value.replace(/\D/g, '').slice(0, 11);
+                                const formatted = digits
+                                    .replace(/^(\d{3})(\d)/, '$1.$2')
+                                    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+                                    .replace(/\.(\d{3})(\d)/, '.$1-$2');
+                                setCpf(formatted);
+                            }}
+                        />
+                    </div>
+
                     {PUBLIC_KEY ? (
                         <div ref={checkoutRef} style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
                             <Payment
+                                key={user?.email || 'mp-payment'}
                                 initialization={initialization}
                                 customization={customization}
                                 onSubmit={handleSubmit}

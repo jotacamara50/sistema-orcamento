@@ -25,6 +25,10 @@ export async function createAnnualPreference(user) {
             payer: {
                 email: user.email
             },
+            payment_methods: {
+                excluded_payment_types: [],
+                installments: 12
+            },
             external_reference: String(user.id),
             back_urls: {
                 success: `${FRONTEND_URL}/?payment=success`

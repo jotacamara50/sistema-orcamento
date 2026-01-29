@@ -8,6 +8,7 @@ import clientsRoutes from './routes/clients.routes.js';
 import budgetsRoutes from './routes/budgets.routes.js';
 import actionsRoutes from './routes/actions.routes.js';
 import adminRoutes from './routes/admin.routes.js';
+import paymentRoutes from './routes/payment.routes.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,6 +35,7 @@ app.use('/api/clients', clientsRoutes);
 app.use('/api/budgets', budgetsRoutes);
 app.use('/api/actions', actionsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

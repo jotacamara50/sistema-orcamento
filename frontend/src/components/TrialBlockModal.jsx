@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import { initMercadoPago, Payment } from '@mercadopago/sdk-react';
 import api, { actions } from '../api';
 
@@ -8,11 +8,26 @@ const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY;
 export default function TrialBlockModal({ onClose }) {
     const [loading, setLoading] = useState(false);
     const [paymentResult, setPaymentResult] = useState(null);
+    const checkoutRef = useRef(null);
 
     useEffect(() => {
         if (PUBLIC_KEY) {
             initMercadoPago(PUBLIC_KEY, { locale: 'pt-BR' });
         }
+    }, []);
+
+    useEffect(() => {
+        // Scroll automático para o checkout após 3 segundos
+        const timer = setTimeout(() => {
+            if (checkoutRef.current) {
+                checkoutRef.current.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 3000);
+
+        return () => clearTimeout(timer);
     }, []);
 
     const initialization = useMemo(() => ({ amount: ANNUAL_PRICE }), []);
@@ -136,7 +151,7 @@ export default function TrialBlockModal({ onClose }) {
                     </div>
 
                     {PUBLIC_KEY ? (
-                        <div style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
+                        <div ref={checkoutRef} style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
                             <Payment
                                 initialization={initialization}
                                 customization={customization}

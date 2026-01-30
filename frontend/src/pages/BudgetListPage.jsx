@@ -202,7 +202,7 @@ export default function BudgetListPage() {
                 }}>
                     <div className="card" style={{ borderLeft: '6px solid #16a34a' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
-                            Aprovados este mês
+                            Fechados este mes
                         </div>
                         <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#16a34a' }}>
                             {formatCurrency(stats.approvedTotal)}
@@ -211,7 +211,7 @@ export default function BudgetListPage() {
 
                     <div className="card" style={{ borderLeft: '6px solid #f59e0b' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
-                            Pendentes
+                            Aguardando resposta
                         </div>
                         <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#b45309' }}>
                             {formatCurrency(stats.pendingTotal)}
@@ -220,7 +220,7 @@ export default function BudgetListPage() {
 
                     <div className="card" style={{ borderLeft: '6px solid #0ea5e9' }}>
                         <div className="text-secondary text-sm" style={{ marginBottom: 'var(--space-xs)' }}>
-                            Taxa de conversão
+                            Percentual fechado
                         </div>
                         <div style={{ fontSize: 'clamp(1.25rem, 4vw, 1.5rem)', fontWeight: 700, color: '#0ea5e9' }}>
                             {Math.round(stats.conversionRate * 100)}%

@@ -58,8 +58,12 @@ export default function TrialBlockModal({ onClose }) {
                 ...payerFromBrick,
                 email: payerFromBrick.email || user?.email || undefined
             };
+            const paymentMethodId =
+                formData?.paymentMethodId ||
+                formData?.payment_method_id ||
+                formData?.payment_method?.id;
             const payload = {
-                payment_method_id: formData?.paymentMethodId,
+                payment_method_id: paymentMethodId,
                 token: formData?.token,
                 issuer_id: formData?.issuerId,
                 installments: formData?.installments,

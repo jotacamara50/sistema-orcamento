@@ -45,7 +45,11 @@ export async function createTransparentPayment(user, payload = {}) {
 
     const payment = new Payment(mpClient);
     const idempotencyKey = crypto.randomUUID();
-    const paymentMethod = String(payload.payment_method_id || '').toLowerCase();
+    const paymentMethodId =
+        payload.payment_method_id ||
+        payload.paymentMethodId ||
+        payload?.payment_method?.id;
+    const paymentMethod = String(paymentMethodId || '').toLowerCase();
 
     const nameParts = String(user.nome || '').trim().split(/\s+/).filter(Boolean);
     const firstName = nameParts[0] || 'Cliente';
@@ -58,7 +62,7 @@ export async function createTransparentPayment(user, payload = {}) {
     const baseBody = {
         transaction_amount: ANNUAL_PRICE,
         description: ANNUAL_TITLE,
-        payment_method_id: payload.payment_method_id,
+        payment_method_id: paymentMethodId,
         external_reference: String(user.id),
         notification_url: notificationUrl,
         payer: {

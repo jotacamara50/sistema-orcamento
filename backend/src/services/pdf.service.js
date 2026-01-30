@@ -38,7 +38,11 @@ export function generateBudgetPDF(budget, user) {
             let cursorY = pageMargin;
 
             if (logoBuffer) {
-                doc.image(logoBuffer, pageWidth - pageMargin - 90, cursorY, { fit: [90, 40] });
+                try {
+                    doc.image(logoBuffer, pageWidth - pageMargin - 90, cursorY, { fit: [90, 40] });
+                } catch {
+                    // Ignore invalid/unsupported logo image to avoid breaking PDF generation.
+                }
             }
 
             doc.fillColor(baseTextColor).fontSize(20).font('Helvetica-Bold').text('OR\u00c7AMENTO', leftX, cursorY);
@@ -289,9 +293,22 @@ function getLogoBuffer(value) {
         return null;
     }
     const dataIndex = trimmed.indexOf('base64,');
-    const base64 = dataIndex >= 0 ? trimmed.slice(dataIndex + 7) : trimmed;
+    let base64 = trimmed;
+    let mimeType = '';
+    if (dataIndex >= 0) {
+        const header = trimmed.slice(0, dataIndex);
+        const match = header.match(/^data:([^;]+);/i);
+        if (match) {
+            mimeType = match[1].toLowerCase();
+        }
+        base64 = trimmed.slice(dataIndex + 7);
+    }
+    if (mimeType && !['image/png', 'image/jpeg', 'image/jpg'].includes(mimeType)) {
+        return null;
+    }
     try {
-        return Buffer.from(base64, 'base64');
+        const buffer = Buffer.from(base64, 'base64');
+        return isSupportedImageBuffer(buffer) ? buffer : null;
     } catch {
         return null;
     }
@@ -300,4 +317,23 @@ function getLogoBuffer(value) {
 function getAccentColor(value) {
     const color = typeof value === 'string' ? value.trim() : '';
     return /^#[0-9a-fA-F]{6}$/.test(color) ? color.toLowerCase() : DEFAULT_ACCENT_COLOR;
+}
+
+function isSupportedImageBuffer(buffer) {
+    if (!buffer || buffer.length < 4) {
+        return false;
+    }
+    // PNG signature: 89 50 4E 47 0D 0A 1A 0A
+    const isPng = buffer.length >= 8
+        && buffer[0] === 0x89
+        && buffer[1] === 0x50
+        && buffer[2] === 0x4e
+        && buffer[3] === 0x47
+        && buffer[4] === 0x0d
+        && buffer[5] === 0x0a
+        && buffer[6] === 0x1a
+        && buffer[7] === 0x0a;
+    // JPEG signature: FF D8
+    const isJpeg = buffer[0] === 0xff && buffer[1] === 0xd8;
+    return isPng || isJpeg;
 }

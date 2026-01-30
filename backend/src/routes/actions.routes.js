@@ -50,6 +50,10 @@ router.get('/budgets/:id/pdf', async (req, res) => {
         const filename = `orcamento-${req.user.id}-${req.params.id}.pdf`;
         const publicPdfsPath = path.join(__dirname, '../../public/pdfs');
         const filePath = path.join(publicPdfsPath, filename);
+
+        if (!fs.existsSync(publicPdfsPath)) {
+            fs.mkdirSync(publicPdfsPath, { recursive: true });
+        }
         
         fs.writeFileSync(filePath, pdfBuffer);
         

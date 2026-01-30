@@ -1,7 +1,22 @@
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import SiteLayout from '../components/SiteLayout';
+import { useAuth } from '../contexts/AuthContext';
 
 export default function HomePage() {
+    const { user, loading } = useAuth();
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+                <div>Carregando...</div>
+            </div>
+        );
+    }
+
+    if (user) {
+        return <Navigate to="/budgets" replace />;
+    }
+
     return (
         <SiteLayout>
             <section className="site-hero site-hero-centered">

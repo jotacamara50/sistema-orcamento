@@ -99,6 +99,13 @@ export default function TrialBlockModal({ onClose }) {
     };
 
     const pixData = paymentResult?.point_of_interaction?.transaction_data;
+    const isApproved = paymentResult?.status === 'approved';
+
+    useEffect(() => {
+        if (!isApproved) return;
+        const timer = setTimeout(() => onClose(), 2500);
+        return () => clearTimeout(timer);
+    }, [isApproved, onClose]);
     const handleCopyPix = async () => {
         if (!pixData?.qr_code) return;
         try {
@@ -197,7 +204,32 @@ export default function TrialBlockModal({ onClose }) {
                         ⬇️ Preencha os dados abaixo para assinar
                     </div>
 
-                    {PUBLIC_KEY && !pixData ? (
+                    {isApproved && (
+                        <div style={{
+                            background: '#ecfdf3',
+                            border: '1px solid #22c55e',
+                            borderRadius: 'var(--radius-md)',
+                            padding: 'var(--space-md)',
+                            textAlign: 'center',
+                            marginBottom: 'var(--space-md)'
+                        }}>
+                            <div style={{ fontSize: '1.4rem', fontWeight: 700, color: '#166534', marginBottom: 'var(--space-xs)' }}>
+                                Pagamento aprovado
+                            </div>
+                            <div style={{ fontSize: '0.95rem', color: '#166534', marginBottom: 'var(--space-sm)' }}>
+                                Seu Plano Anual foi liberado com sucesso. Estamos redirecionando...
+                            </div>
+                            <button
+                                type="button"
+                                className="btn btn-primary btn-sm"
+                                onClick={onClose}
+                            >
+                                Fechar
+                            </button>
+                        </div>
+                    )}
+
+                    {PUBLIC_KEY && !pixData && !isApproved ? (
                         <div ref={checkoutRef} style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
                             <Payment
                                 key={user?.email || 'mp-payment'}

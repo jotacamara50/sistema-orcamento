@@ -36,8 +36,8 @@ export default function LoginPage({ defaultRegister = false }) {
                     window.fbq('track', 'CompleteRegistration');
                 }
                 
-                // Redirect to create first budget (onboarding!)
-                navigate('/budgets/new');
+                // Redirect to budgets home (shows first-time banner)
+                navigate('/budgets');
             } else {
                 await login(formData.email, formData.password);
                 navigate('/budgets');

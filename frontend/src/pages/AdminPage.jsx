@@ -42,32 +42,6 @@ export default function AdminPage() {
     }
   };
 
-  const activatePlan = async (userId, days) => {
-    if (!confirm(`Confirma ativação do plano de ${days} dias?`)) return;
-
-    try {
-      await api.post(`/admin/activate-plan/${userId}`, { days });
-      alert(`Plano de ${days} dias ativado com sucesso!`);
-      loadData();
-    } catch (error) {
-      console.error('Erro ao ativar plano:', error);
-      alert('Erro ao ativar plano');
-    }
-  };
-
-  const deactivatePlan = async (userId) => {
-    if (!confirm('Confirma desativação do plano?')) return;
-
-    try {
-      await api.post(`/admin/deactivate-plan/${userId}`);
-      alert('Plano desativado com sucesso!');
-      loadData();
-    } catch (error) {
-      console.error('Erro ao desativar plano:', error);
-      alert('Erro ao desativar plano');
-    }
-  };
-
   const openWhatsApp = (telefone, nome) => {
     if (!telefone) {
       alert('Usuário não tem telefone cadastrado');
@@ -283,7 +257,7 @@ Se precisar de ajuda, é só me chamar por aqui, combinado?`);
                         {getStatusBadge(user)}
                         {user.paid_until && (
                           <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>
-                            Até {formatDate(user.paid_until)}
+                            At?? {formatDate(user.paid_until)}
                           </div>
                         )}
                       </td>
@@ -299,36 +273,17 @@ Se precisar de ajuda, é só me chamar por aqui, combinado?`);
                               style={{ background: '#16a34a', color: 'white', fontSize: '0.75rem' }}
                               title="WhatsApp"
                             >
-                              📱 WhatsApp
+                              ???? WhatsApp
                             </button>
                           )}
-                          
-                          {!user.is_paid_active && (
-                            <>
-                              <button
-                                onClick={() => activatePlan(user.id, 30)}
-                                className="btn btn-primary btn-sm"
-                                style={{ fontSize: '0.75rem' }}
-                              >
-                                ✓ 30 dias
-                              </button>
-                              <button
-                                onClick={() => activatePlan(user.id, 90)}
-                                className="btn btn-sm"
-                                style={{ background: '#9333ea', color: 'white', fontSize: '0.75rem' }}
-                              >
-                                ✓ 90 dias
-                              </button>
-                            </>
-                          )}
-                          
                           {user.is_paid_active && (
                             <button
-                              onClick={() => deactivatePlan(user.id)}
+                              type="button"
                               className="btn btn-sm"
-                              style={{ background: '#dc2626', color: 'white', fontSize: '0.75rem' }}
+                              disabled
+                              style={{ background: '#16a34a', color: 'white', fontSize: '0.75rem', cursor: 'default' }}
                             >
-                              ✗ Desativar
+                              Plano anual ativo
                             </button>
                           )}
                         </div>
@@ -404,20 +359,16 @@ Se precisar de ajuda, é só me chamar por aqui, combinado?`);
                             📱 WhatsApp
                           </button>
                         )}
-                        <button
-                          onClick={() => activatePlan(user.id, 30)}
-                          className="btn btn-primary btn-sm"
-                          style={{ fontSize: '0.75rem' }}
-                        >
-                          🔄 Renovar 30d
-      div                  </button>
-                        <button
-                          onClick={() => activatePlan(user.id, 90)}
-                          className="btn btn-sm"
-                          style={{ background: '#9333ea', color: 'white', fontSize: '0.75rem' }}
-                        >
-                          🔄 Renovar 90d
-                        </button>
+                        {user.is_paid_active && (
+                          <button
+                            type="button"
+                            className="btn btn-sm"
+                            disabled
+                            style={{ background: '#16a34a', color: 'white', fontSize: '0.75rem', cursor: 'default' }}
+                          >
+                            Plano anual ativo
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>

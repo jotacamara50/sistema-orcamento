@@ -361,20 +361,21 @@ export default function BudgetListPage() {
                                     <div style={{ flex: 1 }}>
                                         <div style={{
                                             display: 'flex',
-                                            alignItems: 'center',
-                                            gap: 'var(--space-md)',
-                                            marginBottom: 'var(--space-sm)',
-                                            flexWrap: 'wrap'
+                                            justifyContent: 'space-between',
+                                            alignItems: 'flex-start',
+                                            marginBottom: '4px',
+                                            gap: 'var(--space-sm)'
                                         }}>
-                                            <h3>Orçamento #{String(budget.numero).padStart(4, '0')}</h3>
+                                            <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937' }}>
+                                                {budget.client_nome}
+                                            </h3>
                                             <StatusBadge status={budget.status} />
                                         </div>
-                                        <p className="text-secondary text-sm">
-                                            Cliente: {budget.client_nome}
-                                        </p>
-                                        <p className="text-secondary text-xs mt-sm">
-                                            {formatDate(budget.data)}
-                                        </p>
+                                        <div style={{ fontSize: '0.85rem', color: '#6b7280', display: 'flex', gap: '8px' }}>
+                                            <span>#{String(budget.numero).padStart(4, '0')}</span>
+                                            <span>&bull;</span>
+                                            <span>{formatDate(budget.data)}</span>
+                                        </div>
                                     </div>
                                     <div style={{
                                         display: 'flex',

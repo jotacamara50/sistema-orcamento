@@ -41,38 +41,41 @@ export async function createAnnualPreference(user) {
 }
 
 export async function createTransparentPayment(user, payload = {}) {
-    if (!accessToken) {
-        throw new Error('MP_ACCESS_TOKEN not configured');
-    }
+    if (!accessToken) throw new Error('MP_ACCESS_TOKEN not configured');
+
     const payment = new Payment(mpClient);
     const idempotencyKey = crypto.randomUUID();
     const paymentMethod = String(payload.payment_method_id || '').toLowerCase();
 
+    const nameParts = String(user.nome || '').trim().split(/\s+/).filter(Boolean);
+    const firstName = nameParts[0] || 'Cliente';
+    const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : 'Cliente';
+
+    const notificationUrl = process.env.NODE_ENV === 'production'
+        ? 'https://orcazap.net/api/payment/webhook'
+        : (process.env.WEBHOOK_URL || undefined);
+
     const baseBody = {
         transaction_amount: ANNUAL_PRICE,
         description: ANNUAL_TITLE,
-        external_reference: String(user.id),
         payment_method_id: payload.payment_method_id,
+        external_reference: String(user.id),
+        notification_url: notificationUrl,
         payer: {
             email: user.email,
-            identification: payload?.payer?.identification || undefined
+            first_name: firstName,
+            last_name: lastName,
+            identification: payload?.payer?.identification
         }
     };
 
     if (paymentMethod !== 'pix') {
         baseBody.token = payload.token;
         baseBody.installments = payload.installments || 1;
-        if (payload.issuer_id) {
-            baseBody.issuer_id = payload.issuer_id;
-        }
+        if (payload.issuer_id) baseBody.issuer_id = payload.issuer_id;
     }
 
-    return payment.create({
-        body: baseBody,
-        requestOptions: {
-            idempotencyKey
-        }
-    });
+    return payment.create({ body: baseBody, requestOptions: { idempotencyKey } });
 }
 
 export async function getPaymentDetails(paymentId) {

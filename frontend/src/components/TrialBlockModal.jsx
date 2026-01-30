@@ -9,6 +9,7 @@ const PUBLIC_KEY = import.meta.env.VITE_MP_PUBLIC_KEY;
 export default function TrialBlockModal({ onClose }) {
     const [loading, setLoading] = useState(false);
     const [paymentResult, setPaymentResult] = useState(null);
+    const [copied, setCopied] = useState(false);
     const checkoutRef = useRef(null);
     const { user } = useAuth();
 
@@ -43,7 +44,9 @@ export default function TrialBlockModal({ onClose }) {
         paymentMethods: {
             creditCard: 'all',
             debitCard: 'all',
-            pix: 'all'
+            pix: 'all',
+            bankTransfer: 'all',
+            maxInstallments: 12
         }
     }), []);
 
@@ -84,6 +87,25 @@ export default function TrialBlockModal({ onClose }) {
     };
 
     const pixData = paymentResult?.point_of_interaction?.transaction_data;
+    const handleCopyPix = async () => {
+        if (!pixData?.qr_code) return;
+        try {
+            await navigator.clipboard.writeText(pixData.qr_code);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        } catch (error) {
+            const textarea = document.createElement('textarea');
+            textarea.value = pixData.qr_code;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+        }
+    };
 
     return (
         <div className="modal-overlay" onClick={onClose}>
@@ -163,7 +185,7 @@ export default function TrialBlockModal({ onClose }) {
                         ⬇️ Preencha os dados abaixo para assinar
                     </div>
 
-                    {PUBLIC_KEY ? (
+                    {PUBLIC_KEY && !pixData ? (
                         <div ref={checkoutRef} style={{ textAlign: 'left', marginBottom: 'var(--space-md)' }}>
                             <Payment
                                 key={user?.email || 'mp-payment'}
@@ -174,9 +196,9 @@ export default function TrialBlockModal({ onClose }) {
                                 onReady={() => {}}
                             />
                         </div>
-                    ) : (
+                    ) : PUBLIC_KEY ? null : (
                         <div className="error-message" style={{ marginBottom: 'var(--space-md)' }}>
-                            Chave pública do Mercado Pago não configurada.
+                            Chave publica do Mercado Pago nao configurada.
                         </div>
                     )}
 
@@ -204,12 +226,21 @@ export default function TrialBlockModal({ onClose }) {
                             <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: 'var(--space-sm)' }}>
                                 Escaneie o QR Code ou copie o código abaixo.
                             </div>
-                            <textarea
-                                readOnly
-                                className="textarea"
-                                value={pixData.qr_code}
-                                style={{ fontSize: '0.8rem' }}
-                            />
+                            <div style={{ display: 'flex', gap: 'var(--space-xs)', alignItems: 'center' }}>
+                                <input
+                                    readOnly
+                                    className="input"
+                                    value={pixData.qr_code}
+                                    style={{ fontSize: '0.8rem', flex: 1 }}
+                                />
+                                <button
+                                    type="button"
+                                    className="btn btn-primary btn-sm"
+                                    onClick={handleCopyPix}
+                                >
+                                    {copied ? 'Copiado!' : 'Copiar'}
+                                </button>
+                            </div>
                             {pixData.ticket_url && (
                                 <a
                                     href={pixData.ticket_url}

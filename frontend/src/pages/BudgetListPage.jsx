@@ -372,7 +372,7 @@ export default function BudgetListPage() {
                                             <StatusBadge status={budget.status} />
                                         </div>
                                         <div style={{ fontSize: '0.85rem', color: '#6b7280', display: 'flex', gap: '8px' }}>
-                                            <span>#{String(budget.numero).padStart(4, '0')}</span>
+                                            <span>Orcamento #{String(budget.numero).padStart(4, '0')}</span>
                                             <span>&bull;</span>
                                             <span>{formatDate(budget.data)}</span>
                                         </div>

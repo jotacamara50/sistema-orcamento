@@ -253,10 +253,12 @@ export default function BudgetViewPage() {
                     marginBottom: 'var(--space-xl)'
                 }}>
                     <div>
-                        <h1>Orçamento #{String(budget.numero).padStart(4, '0')}</h1>
-                        <div style={{ display: 'flex', gap: 'var(--space-md)', alignItems: 'center', marginTop: 'var(--space-sm)', flexWrap: 'wrap' }}>
-                            <StatusBadge status={budget.status} />
+                        <h1>{budget.client_nome}</h1>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: 'var(--space-sm)', flexWrap: 'wrap' }}>
+                            <span className="text-sm text-secondary">Orçamento #{String(budget.numero).padStart(4, '0')}</span>
+                            <span className="text-sm text-secondary">&bull;</span>
                             <span className="text-sm text-secondary">{formatDate(budget.data)}</span>
+                            <StatusBadge status={budget.status} />
                         </div>
                     </div>
                     <Link to="/budgets" className="btn btn-secondary" style={{ alignSelf: 'flex-start', minWidth: '120px' }}>← Voltar</Link>

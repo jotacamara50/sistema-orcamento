@@ -50,9 +50,12 @@ export default function TrialBlockModal({ onClose }) {
         }
     }), []);
 
-    const handleSubmit = async (formData) => {
+    const handleSubmit = async (param) => {
         try {
             setLoading(true);
+
+            const formData = param?.formData ?? param;
+
             const payerFromBrick = formData?.payer || {};
             const payer = {
                 ...payerFromBrick,
@@ -62,6 +65,11 @@ export default function TrialBlockModal({ onClose }) {
                 formData?.paymentMethodId ||
                 formData?.payment_method_id ||
                 formData?.payment_method?.id;
+
+            if (!paymentMethodId) {
+                console.error('Dados recebidos do Brick:', param);
+                throw new Error('Método de pagamento não identificado.');
+            }
             const payload = {
                 payment_method_id: paymentMethodId,
                 token: formData?.token,
